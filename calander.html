@@ -1,866 +1,209 @@
 <!DOCTYPE html>
-
 <html lang="ko">
-
 <head>
-
     <meta charset="UTF-8">
-
     <title>2026 My Smart Dashboard</title>
-
     <style>
-
-#necklace-wrapper { margin: 40px auto; padding: 20px; background: #1e1e1e; border-radius: 20px; text-align: center; max-width: 400px; user-select: none; position: relative; }
-#bead-container { display: flex; justify-content: center; gap: 15px; height: 60px; align-items: center; cursor: grab; overflow: hidden; }
-.bead { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #333; transition: transform 0.2s; }
-.bead.active { width: 45px; height: 45px; border-color: #fff; transform: scale(1.1); }
-
         :root {
-
-            /* 전체 메인 다크 테마 변수 */
-
-            --main: #a29bfe; /* 눈이 덜 아프도록 부드러운 라벤더 컬러로 조정 */
-
-            --red: #ff7675; 
-
-            --blue: #0984e3; 
-
-            --pink: #fd79a8; 
-
-            --green: #00b894; 
-
-            --yellow: #fdcb6e; 
-
-            --bg: #121212; /* 딥 다크 배경 */
-
-            
-
-            --red-vivid: #e74c3c; 
-
-            --blue-vivid: #3498db; 
-
-            --yellow-vivid: #f1c40f;
-
-            
-
-            /* 다크모드용 캘린더 컬러칩 백그라운드 (은은한 가독성 확보) */
-
-            --bg-card: #1e1e1e;
-
-            --bg-input: #2d2d2d;
-
-            --text-main: #e0e0e0;
-
-            --text-sub: #a0a0a0;
-
+            --main: #6c5ce7; --red: #ff7675; --blue: #0984e3; --pink: #fd79a8; --green: #00b894; --yellow: #fdcb6e; --bg: #f4f7f6;
+            --red-vivid: #d63031; --blue-vivid: #0984e3; --yellow-vivid: #f39c12;
         }
-
-        
-
-        body { 
-
-            font-family: 'Pretendard', sans-serif; 
-
-            background: var(--bg); 
-
-            margin: 0; 
-
-            padding: 20px; 
-
-            user-select: none; 
-
-            color: var(--text-main); 
-
-        }
-
-        
-
+        body { font-family: 'Pretendard', sans-serif; background: var(--bg); margin: 0; padding: 20px; user-select: none; color: #2d3436; }
         .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 25px; }
-
-        
-
-        /* 상단 타임라인 패널 다크화 */
-
-        .timeline-panel { 
-
-            background: var(--bg-card); 
-
-            padding: 40px 30px; 
-
-            border-radius: 20px; 
-
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4); 
-
-            position: relative; 
-
-            border: 1px solid rgba(255,255,255,0.05);
-
-        }
-
-        
-
+        .timeline-panel { background: white; padding: 40px 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative; }
         .time-labels { display: flex; justify-content: space-between; margin-bottom: 8px; padding: 0 10px; }
-
-        .time-labels span { font-size: 12px; color: var(--text-sub); font-weight: 700; width: 30px; text-align: center; margin-left: -15px; }
-
-        
-
-        /* 타임라인 트랙 백그라운드 조정 */
-
-        .timeline-track { 
-
-            height: 24px; 
-
-            background: #2d2d2d; 
-
-            border-radius: 12px; 
-
-            position: relative; 
-
-            display: flex; 
-
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); 
-
-        }
-
-        
-
+        .time-labels span { font-size: 12px; color: #a1a1a1; font-weight: 700; width: 30px; text-align: center; margin-left: -15px; }
+        .timeline-track { height: 24px; background: #eee; border-radius: 12px; position: relative; display: flex; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
         .grid-lines { position: absolute; width: 100%; height: 100%; display: flex; justify-content: space-between; pointer-events: none; z-index: 5; }
-
-        .grid-lines i { width: 1px; height: 100%; background: rgba(255,255,255,0.15); }
-
-        .base-layer { position: absolute; width: 100%; height: 100%; display: flex; opacity: 0.35; overflow: hidden; border-radius: 12px; }
-
+        .grid-lines i { width: 1px; height: 100%; background: rgba(255,255,255,0.4); }
+        .base-layer { position: absolute; width: 100%; height: 100%; display: flex; opacity: 0.2; overflow: hidden; border-radius: 12px; }
         .passed-layer-mask { position: absolute; left: 0; height: 100%; width: 0%; overflow: hidden; z-index: 2; transition: width 1s linear; border-radius: 12px 0 0 12px; }
-
         .passed-layer-content { width: 1140px; height: 100%; display: flex; }
-
-        
-
         .zone-y { background: var(--yellow-vivid); flex-grow: 1; }
-
         .zone-b { background: var(--blue-vivid); }
-
         .zone-r { background: var(--red-vivid); }
-
-        
-
-        /* 움직이는 핀 디자인 조정 */
-
-        .pebble { 
-
-            width: 34px; 
-
-            height: 34px; 
-
-            background: #1e1e1e; 
-
-            border: 5px solid var(--main); 
-
-            border-radius: 50%; 
-
-            position: absolute; 
-
-            top: 50%; 
-
-            transform: translate(-50%, -50%); 
-
-            box-shadow: 0 4px 12px rgba(162, 155, 254, 0.4); 
-
-            z-index: 10; 
-
-            transition: left 1s linear; 
-
-        }
-
-
+        .pebble { width: 34px; height: 34px; background: white; border: 5px solid var(--main); border-radius: 50%; position: absolute; top: 50%; transform: translate(-50%, -50%); box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4); z-index: 10; transition: left 1s linear; }
 
         .dashboard-row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
-
-        
-
-        /* 정보 카드 다크 테마화 */
-
-        .info-card {
-    /* 배경을 크게 설정하여 일렁이는 효과 준비 */
-    background: repeating-linear-gradient(
-        135deg, 
-        #a8e0ff 0%, /* 연한 하늘 */
-        #d4a5ff 16%, /* 연한 보라 */
-        #ffd1dc 33%, /* 연한 핑크 */
-        #d1ffd6 50%, /* 연한 민트 */
-        #a8e0ff 66%, /* 다시 시작 */
-	#d4a5ff 83%, /* 연한 보라 */
-	#ffd1dc 100% /* 연한 핑크 */   
-);
-    background-size: 450% 450%; /* 그라데이션 크기를 키움 */
-	background-repeat: repeat;
-    animation: gradient-flow 3s linear infinite; /* 애니메이션 설정 */
-    
-    color: #333; /* 배경이 밝아질 것을 대비해 폰트색 조정 */
-    padding: 25px;
-    border-radius: 20px;
-    display: flex;
-    justify-content: space-around;
-    text-align: center;
-    /* 가독성을 위해 흰색 반투명 레이어 효과를 주는 것도 방법입니다 */
-    backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-/* 애니메이션 정의 */
-@keyframes gradient-flow {
-    0% { background-position: 0% 0%; }
-    100% { background-position: 100% 0%; }
-}
-
-/* 폰트 가독성을 위한 조정 */
-.info-item b { 
-    font-size: 1.5rem; 
-    display: block; 
-    color: #222; /* 짙은 색으로 변경 */
-    text-shadow: 0 0 5px rgba(255,255,255,0.5); /* 글자 주변에 빛 번짐 추가 */
-}
-
-.info-item small { 
-    color: #555; 
-    font-weight: bold;
-}
-        
-
-        /* 리소스 자원 현황 카드 다크화 */
-
-        .resource-card { 
-
-            background: var(--bg-card); 
-
-            padding: 15px 25px; 
-
-            border-radius: 20px; 
-
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
-
-            display: flex; 
-
-            flex-direction: column; 
-
-            justify-content: center; 
-
-            gap: 8px; 
-
-            border: 1px solid rgba(255,255,255,0.05);
-
-        }
-
+        .info-card { background: var(--main); color: white; padding: 25px; border-radius: 20px; display: flex; justify-content: space-around; text-align: center; box-shadow: 0 10px 20px rgba(108, 92, 231, 0.15); }
+        .info-item b { font-size: 1.5rem; display: block; }
+        .resource-card { background: white; padding: 15px 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: center; gap: 8px; }
         .res-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; }
-
-        .res-bar-bg { width: 100px; height: 8px; background: #2d2d2d; border-radius: 4px; overflow: hidden; }
-
+        .res-bar-bg { width: 100px; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
         .res-bar-fill { height: 100%; transition: 0.5s; }
 
-
-
-        /* 컨트롤러 패널 다크화 */
-
-        .calendar-controller { 
-
-            background: var(--bg-card); 
-
-            padding: 15px; 
-
-            border-radius: 15px; 
-
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
-
-            display: flex; 
-
-            justify-content: center; 
-
-            gap: 15px; 
-
-            flex-wrap: wrap; 
-
-            border: 1px solid rgba(255,255,255,0.05);
-
-        }
-
+        .calendar-controller { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
         .ctrl-item { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: bold; cursor: pointer; color: var(--main); }
-
-        .ctrl-item input[type="checkbox"] { accent-color: var(--main); } /* 체크박스 컬러 맞춤 */
-
-        
-
         .main-content { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
-
         .calendar-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
-
-        
-
-        /* 개별 월(Month) 카드 다크화 */
-
-        .month { 
-
-            background: var(--bg-card); 
-
-            border-radius: 15px; 
-
-            padding: 15px; 
-
-            width: 260px; 
-
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
-
-            transition: 0.3s; 
-
-            border: 1px solid rgba(255,255,255,0.03);
-
-        }
-
-        
-
+        .month { background: white; border-radius: 15px; padding: 15px; width: 260px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: 0.3s; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-
-        th { color: var(--text-sub); font-size: 12px; padding-bottom: 8px; }
-
+        td { text-align: center; padding: 10px 0; cursor: pointer; font-size: 13px; position: relative; border-radius: 8px; }
+        td:hover { background: #f0f0ff; transform: scale(1.15); z-index: 5; font-weight: bold; }
         
+        .is-red { color: var(--red) !important; font-weight: bold; }
+        .is-blue { background: var(--blue) !important; color: white !important; font-weight: bold; }
+        .is-pink { background: var(--pink) !important; color: white !important; font-weight: bold; }
+        .is-yellow { background: var(--yellow) !important; color: #7f5500 !important; font-weight: bold; }
+        .is-target { background: var(--green) !important; color: white !important; font-weight: bold; }
+        .today { outline: 2px solid var(--main); outline-offset: -2px; }
+        .has-memo::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: rgba(0,0,0,0.2); border-radius: 50%; }
 
-        /* 날짜 기본 스타일 조정 */
-
-        td { text-align: center; padding: 10px 0; cursor: pointer; font-size: 13px; position: relative; border-radius: 8px; color: #d0d0d0; }
-
-        td:hover { background: rgba(162, 155, 254, 0.15); transform: scale(1.15); z-index: 5; font-weight: bold; color: #fff; }
-
-        
-
-        /* 컬러 지정 시 다크모드 가독성을 위해 테두리 및 텍스트 셰이딩 조정 */
-
-        .is-red { color: #ff7675 !important; font-weight: bold; }
-
-        .is-blue { background: rgba(9, 132, 227, 0.9) !important; color: white !important; font-weight: bold; }
-
-        .is-pink { background: rgba(253, 121, 168, 0.9) !important; color: white !important; font-weight: bold; }
-
-        .is-yellow { background: rgba(253, 203, 110, 0.9) !important; color: #2b1704 !important; font-weight: bold; }
-
-        .is-target { background: rgba(0, 184, 148, 0.9) !important; color: white !important; font-weight: bold; box-shadow: 0 0 10px rgba(0, 184, 148, 0.4); }
-
-        .today { outline: 2px solid var(--main); outline-offset: -2px; color: #fff !important; font-weight: bold; }
-
-        
-
-        /* 일정 메모가 있는 날짜 밑줄 점 표시 */
-
-        .has-memo::after { 
-
-            content: ''; 
-
-            position: absolute; 
-
-            bottom: 4px; 
-
-            left: 50%; 
-
-            transform: translateX(-50%); 
-
-            width: 4px; 
-
-            height: 4px; 
-
-            background: var(--main); 
-
-            border-radius: 50%; 
-
-        }
-
-
-
-        /* 툴팁 다크 모드 연동 */
-
-        .memo-tooltip { 
-
-            visibility: hidden; 
-
-            width: 120px; 
-
-            background-color: #000; 
-
-            color: #fff; 
-
-            text-align: center; 
-
-            border-radius: 6px; 
-
-            padding: 6px; 
-
-            position: absolute; 
-
-            z-index: 100; 
-
-            bottom: 125%; 
-
-            left: 50%; 
-
-            margin-left: -60px; 
-
-            opacity: 0; 
-
-            transition: opacity 0.3s; 
-
-            font-size: 11px; 
-
-            pointer-events: none; 
-
-            font-weight: normal; 
-
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-
-            border: 1px solid rgba(255,255,255,0.1);
-
-        }
-
+        .memo-tooltip { visibility: hidden; width: 120px; background-color: #333; color: #fff; text-align: center; border-radius: 6px; padding: 5px; position: absolute; z-index: 100; bottom: 125%; left: 50%; margin-left: -60px; opacity: 0; transition: opacity 0.3s; font-size: 11px; pointer-events: none; font-weight: normal; }
         td:hover .memo-tooltip { visibility: visible; opacity: 1; }
-
-        
-
-        /* 우측 D-Day 리스트 패널 다크화 */
-
-        .dday-list-panel { 
-
-            background: var(--bg-card); 
-
-            padding: 25px; 
-
-            border-radius: 20px; 
-
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
-
-            position: sticky; 
-
-            top: 20px; 
-
-            max-height: 85vh; 
-
-            overflow-y: auto; 
-
-            border: 1px solid rgba(255,255,255,0.05);
-
-        }
-
-        .dday-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-        .dday-badge { background: var(--main); padding: 4px 10px; border-radius: 8px; font-size: 11px; color: #121212; font-weight: 800; }
-
-        
-
-        /* 팝업 모달창 완전 다크 스킨 업그레이드 */
-
-        #select-modal { 
-
-            position: fixed; 
-
-            top: 50%; 
-
-            left: 50%; 
-
-            transform: translate(-50%, -50%); 
-
-            background: #1e1e1e; 
-
-            padding: 30px; 
-
-            border-radius: 25px; 
-
-            box-shadow: 0 20px 60px rgba(0,0,0,0.7); 
-
-            display: none; 
-
-            z-index: 1000; 
-
-            width: 280px; 
-
-            border: 1px solid rgba(255,255,255,0.1);
-
-        }
-
+        .dday-list-panel { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: sticky; top: 20px; max-height: 85vh; overflow-y: auto; }
+        .dday-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f9f9f9; }
+        .dday-badge { background: var(--main); padding: 4px 10px; border-radius: 8px; font-size: 11px; color: white; font-weight: 800; }
+        #select-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 25px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); display: none; z-index: 1000; width: 280px; }
         .modal-btn { width: 100%; padding: 12px; margin: 5px 0; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-
-        .modal-btn:hover { filter: brightness(1.1); }
-
-        
-
         .clickable-target { cursor: pointer; padding: 2px 8px; border-radius: 8px; }
-
-        .clickable-target:hover { background: rgba(255,255,255,0.15); }
-
+        .clickable-target:hover { background: rgba(255,255,255,0.2); }
     </style>
-
 </head>
-
-<script>
-    // 1단계에서 복사한 데이터를 아래 따옴표 사이에 붙여넣으세요.
-    const initialDb = '{"2026-5-5":{"isRed":true,"memo":"어린이날"},"2026-5-25":{"isRed":true},"2026-5-1":{"isRed":true,"memo":"근로자의 날"},"2026-6-3":{"memo":"선거일이노","isRed":true},"2026-7-17":{"isRed":true},"2026-8-17":{"isRed":true,"memo":"광복절 - 대체공휴일"},"2026-9-25":{"isRed":true},"2026-10-5":{"isRed":true},"2026-10-9":{"isRed":true},"2026-4-4":{"isRed":false},"2026-4-11":{"isRed":false},"2026-4-18":{"isRed":false,"memo":"진주 bro","useDday":false},"2026-4-25":{"isRed":false,"memo":"서울","useDday":false},"2026-7-4":{"isRed":false},"2026-7-11":{"isRed":false,"memo":"매경테스트 (접수 6/1-6/29)","useDday":true},"2026-7-18":{"isRed":false,"memo":"소연 10시","useDday":true},"2026-7-25":{"isRed":false},"2026-10-3":{"isRed":false},"2026-10-10":{"isRed":false},"2026-10-17":{"isRed":false,"type":null},"2026-10-24":{"isRed":false},"2026-10-31":{"isRed":false},"2026-5-2":{"isRed":false},"2026-5-9":{"isRed":false},"2026-5-16":{"isRed":false,"memo":"","useDday":false},"2026-5-30":{"isRed":false},"2026-6-6":{"isRed":false},"2026-6-13":{"isRed":false},"2026-6-20":{"isRed":false},"2026-6-27":{"isRed":false},"2026-9-5":{"isRed":false},"2026-9-12":{"isRed":false},"2026-9-19":{"isRed":false,"memo":"","useDday":false},"2026-9-26":{"isRed":false},"2026-8-1":{"isRed":false},"2026-8-15":{"isRed":false},"2026-8-22":{"isRed":false},"2026-8-29":{"isRed":false},"2026-11-7":{"isRed":false,"type":null},"2026-11-14":{"isRed":false,"type":null},"2026-11-21":{"isRed":false},"2026-11-28":{"isRed":false},"2026-10-12":{"type":"vacation"},"2026-10-13":{"type":"vacation"},"2026-10-14":{"type":null,"memo":"","useDday":false},"2026-10-15":{"type":null,"memo":"","useDday":false},"2026-10-16":{"type":null,"memo":"","useDday":false},"2026-10-23":{"type":"vacation","memo":"","useDday":false},"2026-10-22":{"type":null},"2026-10-21":{"type":null},"2026-10-20":{"type":null,"memo":"","useDday":true},"2026-10-19":{"type":"special"},"2026-10-26":{"type":"sick"},"2026-10-27":{"type":"sick"},"2026-10-28":{"type":"sick"},"2026-10-29":{"type":"vacation"},"2026-10-30":{"type":"vacation"},"2026-10-6":{"type":"sick"},"2026-10-7":{"type":"sick"},"2026-10-8":{"type":"sick"},"2026-11-2":{"type":"sick"},"2026-11-3":{"type":"sick"},"2026-11-9":{"type":null,"memo":"","useDday":true},"2026-11-10":{"type":null,"memo":"","useDday":true},"2026-11-11":{"type":null,"memo":"","useDday":false},"2026-11-13":{"type":null,"memo":"","useDday":false},"2026-4-21":{"memo":"고학년 일본여행"},"2026-4-22":{"memo":"고학년 일본여행","useDday":false},"2026-4-23":{"memo":"고학년 일본여행"},"2026-7-23":{"memo":"안의초 방학식","useDday":false,"type":null},"2026-8-26":{"memo":"안의초 개학식","useDday":false,"type":"special"},"2026-4-3":{"memo":"","useDday":true},"2026-5-23":{"isRed":false},"2026-5-8":{"type":"sick"},"2026-9-28":{"type":"special","memo":"","useDday":true},"2026-9-29":{"type":"sick","memo":"","useDday":false},"2026-9-30":{"type":"sick","memo":"","useDday":false},"2026-5-18":{"type":null,"memo":"","useDday":true},"2026-11-19":{"memo":"수능","useDday":false},"2026-9-2":{"type":"vacation"},"2026-7-10":{"type":"special"},"2026-5-31":{"memo":"","useDday":false},"2026-11-12":{"type":null,"memo":"","useDday":false},"2026-9-3":{"type":null},"2026-9-10":{"type":null},"2026-9-17":{"type":null},"2026-9-18":{"type":null},"2026-9-11":{"type":null},"2026-9-4":{"type":null},"2026-8-6":{"type":null},"2026-8-13":{"type":null},"2026-8-20":{"type":null},"2026-8-27":{"type":null,"memo":"10시 출근","useDday":true},"2026-8-28":{"type":null},"2026-8-21":{"type":null},"2026-8-14":{"type":null},"2026-8-7":{"type":null},"2026-7-9":{"type":null},"2026-7-16":{"type":"vacation"},"2026-7-30":{"type":null},"2026-7-31":{"type":null,"memo":"줌 수업? - 진주","useDday":true,"isRed":true},"2026-7-24":{"type":null,"memo":"9시 출근","useDday":true},"2026-5-12":{"type":null},"2026-5-13":{"type":null},"2026-11-16":{"isRed":false,"type":null},"2026-11-4":{"type":"sick"},"2026-11-5":{"type":"special"},"2026-11-6":{"type":"vacation"},"2026-6-4":{"memo":"6월 특휴","useDday":false,"type":"special"},"2026-6-5":{"memo":"","useDday":false,"type":"vacation"},"2026-9-24":{"isRed":true,"memo":"추석","useDday":false},"2026-5-26":{"type":null},"2026-5-27":{"type":null},"2026-5-21":{"type":null},"2026-5-22":{"type":null},"2026-10-1":{"type":"sick"},"2026-10-2":{"type":"vacation","memo":"포스트말론 내한","useDday":false},"2026-6-15":{"type":null},"2026-6-2":{"type":"special","memo":"5월 특휴","useDday":false},"2026-6-1":{"type":"special","memo":"4월 특휴","useDday":false},"2026-5-28":{"type":null},"2026-5-14":{"memo":"","useDday":false},"2026-5-15":{"memo":"","useDday":false},"2026-5-19":{"memo":"","useDday":true},"2026-5-20":{"memo":"","useDday":true},"2026-5-17":{"memo":"","useDday":true},"2026-9-21":{"type":null},"2026-9-22":{"type":null},"2026-8-5":{"type":"vacation"},"2026-8-18":{"type":null},"2026-8-19":{"type":null},"2026-7-8":{"type":null},"2026-11-18":{"type":null},"2026-6-17":{"memo":"아침 청소 + 병둘동","useDday":false},"2026-6-18":{"memo":"앙 기모띠 혼자 있기","useDday":false},"2026-6-12":{"memo":"병신 둘 동승","useDday":false},"2026-6-25":{"memo":"6인 대면한 날","useDday":false},"2026-11-17":{"type":null},"2026-8-24":{"type":null},"2026-8-25":{"type":null},"2026-10-11":{"type":null},"2026-8-3":{"type":null},"2026-8-31":{"type":null},"2026-7-27":{"type":null},"2026-9-16":{"type":null},"2026-8-12":{"type":"vacation"},"2026-7-22":{"type":null},"2026-7-20":{"type":null},"2026-8-11":{"type":null},"2026-8-10":{"type":null},"2026-9-7":{"type":null},"2026-9-9":{"type":"vacation"}}'; // 복사한 DB 데이터
-    const initialTarget = "2026-11-16"; // 복사한 날짜 데이터
-    const initialToggles = '{"3":false,"4":false,"5":false,"6":true,"7":true,"8":false,"9":false,"10":false}'; // 복사한 토글 데이터
-
-    // 아래 로직은 그대로 유지하되, 데이터 소스만 변수로 바꿉니다.
-    var db = JSON.parse(initialDb || '{}');
-    var savedTarget = initialTarget || "2026-11-16";
-    
-    // 로컬스토리지가 없더라도 초기 데이터를 읽어오도록 설정
-    function loadToggleStates() {
-        var savedStates = JSON.parse(initialToggles || '{}');
-        // ... (이하 동일)
-    }
-
-    // ... (이하 생략)
-</script>
-
 <body>
 
-
 <div class="container">
-
     <div class="timeline-panel">
-
         <div id="digital-clock" style="text-align:center; font-size:1.8rem; font-weight:900; margin-bottom:25px; color:var(--main)">00:00:00</div>
-
         <div class="time-labels"><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span></div>
-
         <div class="timeline-track">
-
             <div class="grid-lines"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-
             <div class="base-layer" id="base-layer"></div>
-
             <div class="passed-layer-mask" id="mask"><div class="passed-layer-content" id="passed-layer"></div></div>
-
             <div class="pebble" id="pebble"></div>
-
         </div>
-
     </div>
-
-
 
     <div class="dashboard-row">
-
         <div class="info-card">
-
             <div class="info-item"><small>남은 일수</small><b id="raw-d">0</b></div>
-
             <div class="info-item"><small>실질 근무일</small><b id="real-d">0</b></div>
-
             <div class="info-item">
-
                 <small>전역일</small>
-
                 <b id="target-display" class="clickable-target" onclick="changeTargetDate()">11/16</b>
-
             </div>
-
         </div>
-
         <div class="resource-card">
-
             <div class="res-row"><span>🏖️ 연차 <span id="v-val">0</span>/13</span><div class="res-bar-bg"><div id="v-bar" class="res-bar-fill" style="background:var(--blue); width:0%"></div></div></div>
-
             <div class="res-row"><span>⭐ 특휴 <span id="sp-val">0</span>/8</span><div class="res-bar-bg"><div id="sp-bar" class="res-bar-fill" style="background:var(--yellow); width:0%"></div></div></div>
-
             <div class="res-row"><span>🤒 병가 <span id="s-val">0</span>/13</span><div class="res-bar-bg"><div id="s-bar" class="res-bar-fill" style="background:var(--pink); width:0%"></div></div></div>
-
         </div>
-
     </div>
-
-
 
     <div class="calendar-controller">
-
-        <span style="font-size: 13px; color: var(--text-sub); width: 100%; text-align: center; margin-bottom: 5px;">📅 달력 보기 설정</span>
-
+        <span style="font-size: 13px; color: #666; width: 100%; text-align: center; margin-bottom: 5px;">📅 달력 보기 설정</span>
         <label class="ctrl-item"><input type="checkbox" class="month-toggle" data-month="3" checked onchange="handleToggleChange()"> 4월</label>
-
         <label class="ctrl-item"><input type="checkbox" class="month-toggle" data-month="4" checked onchange="handleToggleChange()"> 5월</label>
-
         <label class="ctrl-item"><input type="checkbox" class="month-toggle" data-month="5" checked onchange="handleToggleChange()"> 6월</label>
-
         <label class="ctrl-item"><input type="checkbox" class="month-toggle" data-month="6" checked onchange="handleToggleChange()"> 7월</label>
-
         <label class="ctrl-item"><input type="checkbox" class="month-toggle" data-month="7" checked onchange="handleToggleChange()"> 8월</label>
-
         <label class="ctrl-item"><input type="checkbox" class="month-toggle" data-month="8" checked onchange="handleToggleChange()"> 9월</label>
-
         <label class="ctrl-item"><input type="checkbox" class="month-toggle" data-month="9" checked onchange="handleToggleChange()"> 10월</label>
-
         <label class="ctrl-item"><input type="checkbox" class="month-toggle" data-month="10" checked onchange="handleToggleChange()"> 11월</label>
-
     </div>
-
-
 
     <div class="main-content">
-
         <div id="calendar-area" class="calendar-grid"></div>
-
         <div class="dday-list-panel">
-
             <h3 style="margin:0 0 15px 0; font-size:1.1rem; color:var(--main)">📌 일정별 D-Day</h3>
-
             <div id="memo-dday-list"></div>
-
         </div>
-
     </div>
-
 </div>
-
-
 
 <div id="select-modal">
-
     <h4 style="margin:0 0 15px 0; color:var(--main)">날짜 편집</h4>
-
     <button class="modal-btn" style="background:var(--red); color:white;" onclick="applyAction('red')">🚩 빨간날 지정</button>
-
     <button class="modal-btn" style="background:var(--blue); color:white;" onclick="applyAction('vacation')">🏖️ 연차 지정 (파랑)</button>
-
     <button class="modal-btn" style="background:var(--yellow); color:#7f5500;" onclick="applyAction('special')">⭐ 특휴 지정 (노랑)</button>
-
     <button class="modal-btn" style="background:var(--pink); color:white;" onclick="applyAction('sick')">🤒 병가 지정 (핑크)</button>
-
-    <div style="border-top:1px solid rgba(255,255,255,0.1); margin:10px 0; padding-top:10px;">
-
-        <button class="modal-btn" style="background:var(--main); color:#121212;" onclick="applyAction('memo')">📝 일정/D-Day 설정</button>
-
+    <div style="border-top:1px solid #eee; margin:10px 0; padding-top:10px;">
+        <button class="modal-btn" style="background:var(--main); color:white;" onclick="applyAction('memo')">📝 일정/D-Day 설정</button>
     </div>
-
-    <button class="modal-btn" style="background:#2d2d2d; color:#fff;" onclick="applyAction('clear')">🔄 초기화</button>
-
-    <button class="modal-btn" style="background:#444; color:#fff;" onclick="closeModal()">닫기</button>
-
+    <button class="modal-btn" style="background:#eee" onclick="applyAction('clear')">🔄 초기화</button>
+    <button class="modal-btn" style="background:#ddd" onclick="closeModal()">닫기</button>
 </div>
 
-
-
 <script>
-
     var db = JSON.parse(localStorage.getItem('my_final_db_v11') || '{}');
-
     Object.assign(db, JSON.parse(localStorage.getItem('my_final_db_v12') || '{}'));
-
     Object.assign(db, JSON.parse(localStorage.getItem('my_final_db_v13') || '{}'));
 
-
-
     var savedTarget = localStorage.getItem('my_target_date') || "2026-11-16";
-
     var targetDate = new Date(savedTarget);
-
     var selectedDates = []; 
-
     var isDragging = false;
-
-
 
     const holidays2026 = ["1-1", "2-16", "2-17", "2-18", "3-1", "5-5", "5-24", "6-6", "8-15", "9-24", "9-25", "9-26", "10-3", "10-9", "12-25"];
 
-
-
+    // [추가] 저장된 체크박스 상태 불러오기 함수
     function loadToggleStates() {
-
         var savedStates = JSON.parse(localStorage.getItem('my_calendar_toggles') || '{}');
-
         document.querySelectorAll('.month-toggle').forEach(el => {
-
             var m = el.getAttribute('data-month');
-
             if (savedStates[m] !== undefined) {
-
                 el.checked = savedStates[m];
-
             }
-
         });
-
     }
 
-
-
+    // [추가] 체크박스 상태 변경 시 저장하고 렌더링하는 함수
     function handleToggleChange() {
-
         var states = {};
-
         document.querySelectorAll('.month-toggle').forEach(el => {
-
             states[el.getAttribute('data-month')] = el.checked;
-
         });
-
         localStorage.setItem('my_calendar_toggles', JSON.stringify(states));
-
         render();
-
     }
-
-
 
     function changeTargetDate() {
-
         var newDate = prompt("새로운 전역일을 입력하세요 (YYYY-MM-DD):", savedTarget);
-
         if (newDate && !isNaN(Date.parse(newDate))) {
-
             localStorage.setItem('my_target_date', newDate);
-
             savedTarget = newDate;
-
             targetDate = new Date(newDate);
-
             targetDate.setHours(0,0,0,0); 
-
             render();
-
         }
-
     }
-
-
 
     function buildTimeline() {
-
         var now = new Date(); var day = now.getDay();
-
         [document.getElementById('base-layer'), document.getElementById('passed-layer')].forEach(layer => {
-
             layer.innerHTML = '';
-
             var y1 = document.createElement('div'); y1.className = 'zone-y'; y1.style.width = "27.77%"; layer.appendChild(y1);
-
             var b1 = document.createElement('div'); b1.className = 'zone-b'; b1.style.width = "11.11%"; layer.appendChild(b1);
-
             if(day >= 1 && day <= 2) { 
-
                 var y2 = document.createElement('div'); y2.className = 'zone-y'; y2.style.width = "25%"; layer.appendChild(y2); 
-
                 var r1 = document.createElement('div'); r1.className = 'zone-r'; r1.style.width = "19.45%"; layer.appendChild(r1); 
-
                 var y3 = document.createElement('div'); y3.className = 'zone-y'; y3.style.width = "16.67%"; layer.appendChild(y3); 
-
             } else if(day >= 3 && day <= 5) { 
-
                 var y2 = document.createElement('div'); y2.className = 'zone-y'; y2.style.width = "16.67%"; layer.appendChild(y2); 
-
                 var r1 = document.createElement('div'); r1.className = 'zone-r'; r1.style.width = "27.77%"; layer.appendChild(r1); 
-
                 var y3 = document.createElement('div'); y3.className = 'zone-y'; y3.style.width = "16.67%"; layer.appendChild(y3); 
-
             } else { var y2 = document.createElement('div'); y2.className = 'zone-y'; y2.style.width = "61.12%"; layer.appendChild(y2); }
-
         });
-
     }
-
-
 
     function updateTimeline() {
-
         var now = new Date();
-
         document.getElementById('digital-clock').innerText = now.toLocaleTimeString('ko-KR', { hour12: false });
-
         var start = 600, end = 1140; var curr = now.getHours() * 60 + now.getMinutes() + (now.getSeconds() / 60);
-
         var pct = Math.max(0, Math.min(100, ((curr - start) / (end - start)) * 100));
-
         document.getElementById('pebble').style.left = pct + "%";
-
         document.getElementById('mask').style.width = pct + "%";
-
     }
 
-
-
-function render() {
+    function render() {
         var area = document.getElementById('calendar-area'); area.innerHTML = '';
         var listArea = document.getElementById('memo-dday-list'); listArea.innerHTML = '';
         var today = new Date(); today.setHours(0,0,0,0);
         targetDate.setHours(0,0,0,0); 
         
-        // 1. 근무일 인덱스 생성 (workingDaysMap)
-        var workingDaysMap = {};
-	var count = 0;
-// 4월 1일 시작 (JS 월은 0부터 시작하므로 3이 4월)
-var loopDate = new Date(2026, 3, 1); 
-loopDate.setHours(0,0,0,0);
-// 11월 30일 종료 (JS 월은 0부터 시작하므로 10이 11월)
-var endDate = new Date(2026, 10, 30); 
-endDate.setHours(0,0,0,0);
-
-while (loopDate <= endDate) {
-    var dStr = loopDate.getFullYear() + "-" + (loopDate.getMonth() + 1) + "-" + loopDate.getDate();
-    var dayInfo = db[dStr] || {};
-    var dow = loopDate.getDay();
-    var isHol = holidays2026.includes((loopDate.getMonth()+1)+"-"+loopDate.getDate());
-
-    // 근무일 조건: 주말 제외, 빨간날 제외, 휴가(연차/병가 등) 제외
-    if (dow !== 0 && dow !== 6 && !dayInfo.isRed && !isHol && !dayInfo.type) {
-        count++;
-        workingDaysMap[dStr] = count;
-    }
-    loopDate.setDate(loopDate.getDate() + 1);
-}
-
-// 2. 현재일(오늘) 인덱스 찾기 (보정 로직 추가)
-todayStr = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
-
-var todayIdx = 0;
-var tempDate = new Date(today);
-// 인덱스를 찾을 때까지 최대 30일 전까지 거꾸로 탐색 (주말/휴가 고려)
-for (var i = 0; i < 30; i++) {
-    var dStr = tempDate.getFullYear() + "-" + (tempDate.getMonth() + 1) + "-" + tempDate.getDate();
-    if (workingDaysMap[dStr]) {
-        todayIdx = workingDaysMap[dStr];
-        break;
-    }
-    tempDate.setDate(tempDate.getDate() - 1);
-}
-
-// 3. 오늘부터 전역일까지의 남은 실근무일 계산
-// 오늘이 이미 지났거나 근무일이 아니더라도, 마지막 근무일 기준으로 계산
-// 1. 기존의 count를 이용한 계산 대신, 전역일(targetDate)의 인덱스를 찾아냅니다.
-var targetStr = targetDate.getFullYear() + "-" + (targetDate.getMonth() + 1) + "-" + targetDate.getDate();
-var targetIdx = workingDaysMap[targetStr];
-
-// 만약 전역일이 주말/공휴일이라 인덱스가 없다면, 
-// 그 전날 근무일 인덱스를 가져오도록 보정 (위에서 todayIdx 구한 것과 같은 원리)
-if (!targetIdx) {
-    var tempTargetDate = new Date(targetDate);
-    for (var i = 0; i < 40; i++) {
-        var dStr = tempTargetDate.getFullYear() + "-" + (tempTargetDate.getMonth() + 1) + "-" + tempTargetDate.getDate();
-        if (workingDaysMap[dStr]) {
-            targetIdx = workingDaysMap[dStr];
-            break;
-        }
-        tempTargetDate.setDate(tempTargetDate.getDate() - 1);
-    }
-}
-
-// 2. 남은 근무일 계산: (전역일 근무 인덱스) - (오늘 근무 인덱스) + 1
-// 오늘이 전역일보다 이후라면 0, 아니면 차이만큼 계산
-var remainingWorkingDays = Math.max(0, targetIdx - todayIdx + 1);
-
-// 3. 화면 표시
-document.getElementById('real-d').innerText = remainingWorkingDays + "일";
-// 오늘이 오늘 기준으로 이미 근무한 날이라면 1을 빼주어야 할 수도 있습니다. 
-// 현재 상황에서는 '오늘 포함 남은 일수'를 계산하기 위함입니다.
-
-// 4. 화면 표시
-document.getElementById('real-d').innerText = remainingWorkingDays + "일";
-console.log("오늘 인덱스:", todayIdx, "전체 근무일:", count);
-
-        // 3. 기존 달력 렌더링 로직 (vUsed, sUsed 계산 포함)
         var vUsed = 0, sUsed = 0, spUsed = 0;
         var ddayItems = [];
+
         var toggleMap = {};
         document.querySelectorAll('.month-toggle').forEach(el => {
             toggleMap[el.getAttribute('data-month')] = el.checked;
@@ -870,7 +213,7 @@ console.log("오늘 인덱스:", todayIdx, "전체 근무일:", count);
 
         for (var m = 3; m <= 10; m++) {
             var isVisible = toggleMap[m] ? "display:block" : "display:none";
-            var html = `<div class="month" style="${isVisible}"><div style="text-align:center; font-weight:800; margin-bottom:10px; color:var(--main)">${m+1}월</div><table><tr><th>일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th></tr><tr>`;
+            var html = `<div class="month" style="${isVisible}"><div class="m-title" style="text-align:center; font-weight:800; margin-bottom:10px; color:var(--main)">${m+1}월</div><table><tr><th>일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th></tr><tr>`;
             var first = new Date(2026, m, 1).getDay(), last = new Date(2026, m + 1, 0).getDate();
             for (var i = 0; i < first; i++) html += '<td></td>';
             for (var d = 1; d <= last; d++) {
@@ -879,10 +222,12 @@ console.log("오늘 인덱스:", todayIdx, "전체 근무일:", count);
                 curD.setHours(0,0,0,0);
                 var info = db[dStr] || {};
                 var cls = [];
+
                 if (curD.getDay() === 0 || info.isRed || holidays2026.includes((m+1)+"-"+d)) cls.push('is-red');
                 if (info.type === 'vacation') { cls.push('is-blue'); vUsed++; }
                 if (info.type === 'special') { cls.push('is-yellow'); spUsed++; }
                 if (info.type === 'sick') { cls.push('is-pink'); sUsed++; }
+                
                 if (curD.getTime() === targetDate.getTime()) cls.push('is-target');
                 if (curD.getTime() === today.getTime()) cls.push('today');
                 
@@ -908,174 +253,59 @@ console.log("오늘 인덱스:", todayIdx, "전체 근무일:", count);
         var rawDiff = Math.ceil((targetDate - today) / 86400000);
         document.getElementById('raw-d').innerText = rawDiff > 0 ? "D-" + rawDiff : (rawDiff === 0 ? "D-Day" : "D+" + Math.abs(rawDiff));
 
+        var realWorkingDays = 0;
+        var loopDate = new Date(today);
+        while (loopDate < targetDate) {
+            var ds = loopDate.getFullYear() + "-" + (loopDate.getMonth() + 1) + "-" + loopDate.getDate();
+            var dayInfo = db[ds] || {};
+            var dow = loopDate.getDay();
+            var isHol = holidays2026.includes((loopDate.getMonth()+1)+"-"+loopDate.getDate());
+            if (dow !== 0 && dow !== 6 && !dayInfo.isRed && !isHol && !dayInfo.type) {
+                realWorkingDays++;
+            }
+            loopDate.setDate(loopDate.getDate() + 1);
+        }
+        document.getElementById('real-d').innerText = realWorkingDays + "일";
+
         ddayItems.sort((a,b) => a.date - b.date);
         ddayItems.forEach(item => {
             var diff = Math.ceil((item.date - today) / 86400000);
             var dTag = diff === 0 ? "D-Day" : (diff > 0 ? "D-" + diff : "D+" + Math.abs(diff));
             listArea.innerHTML += `<div class="dday-item"><div><b>${item.text}</b><br><small style="color:#b2bec3">${(item.date.getMonth()+1)}월 ${item.date.getDate()}일</small></div><span class="dday-badge">${dTag}</span></div>`;
         });
-	localStorage.setItem('shared_working_map', JSON.stringify(workingDaysMap));
-	console.log("저장된 데이터 확인:", JSON.parse(localStorage.getItem('shared_working_map')));  
-  }
-
-
-
-    function startDrag(d) { isDragging = true; selectedDates = [d]; }
-
-    function doDrag(d) { if(isDragging && !selectedDates.includes(d)) selectedDates.push(d); }
-
-    window.onmouseup = function() { if(isDragging) { document.getElementById('select-modal').style.display = 'block'; } isDragging = false; };
-
-    
-
-    function applyAction(action) {
-
-        if(action === 'memo') {
-
-            var firstDate = selectedDates[0];
-
-            var currentMemo = db[firstDate]?.memo || "";
-
-            var newMemo = prompt("일정 내용을 입력하세요:", currentMemo);
-
-            if (newMemo !== null) {
-
-                var useDday = confirm("이 일정을 우측 D-Day 리스트에 표시할까요?");
-
-                selectedDates.forEach(d => { if(!db[d]) db[d]={}; db[d].memo = newMemo; db[d].useDday = useDday; });
-
-            }
-
-        } 
-
-        else if(action === 'red') selectedDates.forEach(d => { if(!db[d]) db[d]={}; db[d].isRed = !db[d].isRed; });
-
-        else if(action === 'vacation') selectedDates.forEach(d => { if(!db[d]) db[d]={}; db[d].type = (db[d].type === 'vacation' ? null : 'vacation'); });
-
-        else if(action === 'special') selectedDates.forEach(d => { if(!db[d]) db[d]={}; db[d].type = (db[d].type === 'special' ? null : 'special'); });
-
-        else if(action === 'sick') selectedDates.forEach(d => { if(!db[d]) db[d]={}; db[d].type = (db[d].type === 'sick' ? null : 'sick'); });
-
-        else if(action === 'clear') selectedDates.forEach(d => delete db[d]);
-
-        
-
-        localStorage.setItem('my_final_db_v13', JSON.stringify(db));
-
-        closeModal(); render();
-
     }
 
+    function startDrag(d) { isDragging = true; selectedDates = [d]; }
+    function doDrag(d) { if(isDragging && !selectedDates.includes(d)) selectedDates.push(d); }
+    window.onmouseup = function() { if(isDragging) { document.getElementById('select-modal').style.display = 'block'; } isDragging = false; };
+    
+    function applyAction(action) {
+        if(action === 'memo') {
+            var firstDate = selectedDates[0];
+            var currentMemo = db[firstDate]?.memo || "";
+            var newMemo = prompt("일정 내용을 입력하세요:", currentMemo);
+            if (newMemo !== null) {
+                var useDday = confirm("이 일정을 우측 D-Day 리스트에 표시할까요?");
+                selectedDates.forEach(d => { if(!db[d]) db[d]={}; db[d].memo = newMemo; db[d].useDday = useDday; });
+            }
+        } 
+        else if(action === 'red') selectedDates.forEach(d => { if(!db[d]) db[d]={}; db[d].isRed = !db[d].isRed; });
+        else if(action === 'vacation') selectedDates.forEach(d => { if(!db[d]) db[d]={}; db[d].type = (db[d].type === 'vacation' ? null : 'vacation'); });
+        else if(action === 'special') selectedDates.forEach(d => { if(!db[d]) db[d]={}; db[d].type = (db[d].type === 'special' ? null : 'special'); });
+        else if(action === 'sick') selectedDates.forEach(d => { if(!db[d]) db[d]={}; db[d].type = (db[d].type === 'sick' ? null : 'sick'); });
+        else if(action === 'clear') selectedDates.forEach(d => delete db[d]);
+        
+        localStorage.setItem('my_final_db_v13', JSON.stringify(db));
+        closeModal(); render();
+    }
     function closeModal() { document.getElementById('select-modal').style.display = 'none'; selectedDates = []; }
 
-
-
+    // 초기 실행 순서 제어
     buildTimeline(); 
-
     setInterval(updateTimeline, 1000); 
-
     updateTimeline(); 
-
-    loadToggleStates(); 
-
+    loadToggleStates(); // [추가] 렌더링하기 전에 체크박스 설정값을 수첩(localStorage)에서 로드
     render();
-
-
 </script>
-
-<div id="necklace-wrapper" style="margin: 40px auto; padding: 20px; background: #121212; border-radius: 20px; text-align: center; max-width: 1000px; user-select: none; position: relative; border: 1px solid #333;">
-    <div style="font-size: 24px; color: #ff7675; margin-bottom: 5px;">▼</div>
-    <div id="date-label" style="color: #eee; margin-bottom: 20px; font-weight: bold; letter-spacing: 1px;">2026-07-14</div>
-    <div id="bead-container" style="display: flex; justify-content: center; gap: 18px; height: 100px; align-items: center; cursor: grab; overflow: hidden;"></div>
-</div>
-
-<script>
-(function() {
-    let current = new Date();
-    const container = document.getElementById('bead-container');
-    const label = document.getElementById('date-label');
-    const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-    let isDown = false, startX;
-
-    const render = () => {
-        container.innerHTML = '';
-        label.innerText = current.toISOString().split('T')[0];
-        
-        for (let i = -13; i <= 13; i++) {
-            let d = new Date(current);
-            d.setDate(d.getDate() + i);
-            let dStr = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
-            let info = db[dStr] || {};
-            let isTarget = (d.toDateString() === targetDate.toDateString());
-            let isRedDay = info.isRed || holidays2026.includes((d.getMonth()+1)+"-"+d.getDate());
-            let isWeekend = (d.getDay() === 0 || d.getDay() === 6);
-            let isToday = (d.toDateString() === new Date().toDateString());
-
-            // 구슬 Wrapper
-            let bWrap = document.createElement('div');
-            bWrap.style.display = "flex";
-            bWrap.style.flexDirection = "column";
-            bWrap.style.alignItems = "center";
-            bWrap.style.gap = "8px";
-
-            // 오늘 날짜 표시 (Today)
-            if (isToday) {
-                let todayLabel = document.createElement('div');
-                todayLabel.innerText = "TODAY";
-                todayLabel.style.fontSize = "10px";
-                todayLabel.style.color = "#a29bfe";
-                todayLabel.style.fontWeight = "bold";
-                bWrap.appendChild(todayLabel);
-            } else {
-                let spacer = document.createElement('div');
-                spacer.style.height = "12px";
-                bWrap.appendChild(spacer);
-            }
-
-            // 구슬
-            let b = document.createElement('div');
-            let color = "#ffffff";
-            if (isTarget) color = "#00b894";
-            else if (info.type === 'vacation') color = "#0984e3";
-            else if (info.type === 'sick') color = "#fd79a8";
-            else if (info.type === 'special') color = "#fdcb6e";
-            else if (isRedDay) color = "#e74c3c";
-            else if (isWeekend) color = "#2d2d2d";
-            
-            b.style.background = color;
-            b.style.borderRadius = "50%";
-            b.style.transition = "0.2s";
-            b.style.width = (i === 0) ? "60px" : (color === "#ffffff" ? "30px" : "12px");
-            b.style.height = b.style.width;
-            bWrap.appendChild(b);
-
-            // 요일 표시 (SUN, MON...)
-            let dayLabel = document.createElement('div');
-            dayLabel.innerText = days[d.getDay()];
-            dayLabel.style.fontSize = "10px";
-            dayLabel.style.color = "#666";
-            bWrap.appendChild(dayLabel);
-            
-            container.appendChild(bWrap);
-        }
-    };
-
-    container.onmousedown = (e) => { isDown = true; startX = e.pageX; };
-    window.onmousemove = (e) => {
-        if (!isDown) return;
-        let diff = e.pageX - startX;
-        if (Math.abs(diff) > 30) {
-            current.setDate(current.getDate() + (diff > 0 ? -1 : 1));
-            render();
-            startX = e.pageX;
-        }
-    };
-    window.onmouseup = () => { isDown = false; };
-    render();
-})();
-</script>
-
 </body>
-
 </html>
-
