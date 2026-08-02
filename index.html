@@ -1405,7 +1405,48 @@ console.log("오늘 인덱스:", todayIdx, "전체 근무일:", count);
             downloadAnchor.click();
             downloadAnchor.remove();
         }
-    </script>
+
+		<script>
+
+// 깃허브에 같이 올려둔 JSON 파일 경로 지정
+
+fetch('my_data.json')
+
+.then(response => response.json())
+
+.then(data => {
+
+const container = document.getElementById('data-container');
+
+
+// 가져온 데이터를 화면에 보기 좋게 출력하는 예시 코드
+
+let html = '<ul>';
+
+for (const key in data) {
+
+html += `<li><strong>${key}:</strong> ${JSON.stringify(data[key])}</li>`;
+
+}
+
+html += '</ul>';
+
+
+container.innerHTML = html;
+
+})
+
+.catch(error => {
+
+document.getElementById('data-container').innerText = '데이터를 불러오지 못했습니다.';
+
+console.error('Error:', error);
+
+});
+
+</script>
+
+</script>
 
 </body>
 
