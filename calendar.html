@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+
+<head>
+
+    <meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⏰</text></svg>">
+<title>2026 My Smart Dashboard</title>
+
+    <style>
+
+#necklace-wrapper { margin: 40px auto; padding: 20px; background: #1e1e1e; border-radius: 20px; text-align: center; max-width: 400px; user-select: none; position: relative; }
+#bead-container { display: flex; justify-content: center; gap: 15px; height: 60px; align-items: center; cursor: grab; overflow: hidden; }
+.bead { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #333; transition: transform 0.2s; }
+.bead.active { width: 45px; height: 45px; border-color: #fff; transform: scale(1.1); }
+
+        :root {
+
+            /* 전체 메인 다크 테마 변수 */
+
+            --main: #a29bfe; /* 눈이 덜 아프도록 부드러운 라벤더 컬러로 조정 */
+
+            --red: #ff7675; 
+
+            --blue: #0984e3; 
+
+            --pink: #fd79a8; 
+
+            --green: #00b894; 
+
+            --yellow: #fdcb6e; 
+
+            --bg: #121212; /* 딥 다크 배경 */
+
+            
+
+            --red-vivid: #e74c3c; 
+
+            --blue-vivid: #3498db; 
+
+            --yellow-vivid: #f1c40f;
+
+            
+
+            /* 다크모드용 캘린더 컬러칩 백그라운드 (은은한 가독성 확보) */
+
+            --bg-card: #1e1e1e;
+
+            --bg-input: #2d2d2d;
+
+            --text-main: #e0e0e0;
+
+            --text-sub: #a0a0a0;
+
+        }
+
+        
+
+        body { 
+
+            font-family: 'Pretendard', sans-serif; 
+
+            background: var(--bg); 
+
+            margin: 0; 
+
+            padding: 20px; 
+
+            user-select: none; 
+
+            color: var(--text-main); 
+
+        }
+
+        
+
+        .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 25px; }
+
+        
+
+        /* 상단 타임라인 패널 다크화 */
+
+        .timeline-panel { 
+
+            background: var(--bg-card); 
+
+            padding: 40px 30px; 
+
+            border-radius: 20px; 
+
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4); 
+
+            position: relative; 
+
+            border: 1px solid rgba(255,255,255,0.05);
+
+        }
+
+        
+
+        .time-labels { display: flex; justify-content: space-between; margin-bottom: 8px; padding: 0 10px; }
+
+        .time-labels span { font-size: 12px; color: var(--text-sub); font-weight: 700; width: 30px; text-align: center; margin-left: -15px; }
+
+        
+
+        /* 타임라인 트랙 백그라운드 조정 */
+
+        .timeline-track { 
+
+            height: 24px; 
+
+            background: #2d2d2d; 
+
+            border-radius: 12px; 
+
+            position: relative; 
+
+            display: flex; 
+
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); 
+
+        }
+
+        
+
+        .grid-lines { position: absolute; width: 100%; height: 100%; display: flex; justify-content: space-between; pointer-events: none; z-index: 5; }
+
+        .grid-lines i { width: 1px; height: 100%; background: rgba(255,255,255,0.15); }
+
+        .base-layer { position: absolute; width: 100%; height: 100%; display: flex; opacity: 0.35; overflow: hidden; border-radius: 12px; }
+
+        .passed-layer-mask { position: absolute; left: 0; height: 100%; width: 0%; overflow: hidden; z-index: 2; transition: width 1s linear; border-radius: 12px 0 0 12px; }
+
+        .passed-layer-content { width: 1140px; height: 100%; display: flex; }
+
+        
+
+        .zone-y { background: var(--yellow-vivid); flex-grow: 1; }
+
+        .zone-b { background: var(--blue-vivid); }
+
+        .zone-r { background: var(--red-vivid); }
+
+        
+
+        /* 움직이는 핀 디자인 조정 */
+
+        .pebble { 
+
+            width: 34px; 
+
+            height: 34px; 
+
+            background: #1e1e1e; 
+
+            border: 5px solid var(--main); 
+
+            border-radius: 50%; 
+
+            position: absolute; 
+
+            top: 50%; 
+
+            transform: translate(-50%, -50%); 
+
+            box-shadow: 0 4px 12px rgba(162, 155, 254, 0.4); 
+
+            z-index: 10; 
+
+            transition: left 1s linear; 
+
+        }
+
+
+
+        .dashboard-row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+
+        
+
+        /* 정보 카드 다크 테마화 */
+
+        .info-card {
+    /* 배경을 크게 설정하여 일렁이는 효과 준비 */
+    background: repeating-linear-gradient(
+        135deg, 
+        #a8e0ff 0%, /* 연한 하늘 */
+        #d4a5ff 16%, /* 연한 보라 */
+        #ffd1dc 33%, /* 연한 핑크 */
+        #d1ffd6 50%, /* 연한 민트 */
+        #a8e0ff 66%, /* 다시 시작 */
+	#d4a5ff 83%, /* 연한 보라 */
+	#ffd1dc 100% /* 연한 핑크 */   
+);
+    background-size: 450% 450%; /* 그라데이션 크기를 키움 */
+	background-repeat: repeat;
+    animation: gradient-flow 3s linear infinite; /* 애니메이션 설정 */
+    
+    color: #333; /* 배경이 밝아질 것을 대비해 폰트색 조정 */
+    padding: 25px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    /* 가독성을 위해 흰색 반투명 레이어 효과를 주는 것도 방법입니다 */
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* 애니메이션 정의 */
+@keyframes gradient-flow {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 0%; }
+}
+
+/* 폰트 가독성을 위한 조정 */
+.info-item b { 
+    font-size: 1.5rem; 
+    display: block; 
+    color: #222; /* 짙은 색으로 변경 */
+    text-shadow: 0 0 5px rgba(255,255,255,0.5); /* 글자 주변에 빛 번짐 추가 */
+}
+
+.info-item small { 
+    color: #555; 
+    font-weight: bold;
+}
+        
+
+        /* 리소스 자원 현황 카드 다크화 */
+
+        .resource-card { 
+
+            background: var(--bg-card); 
+
+            padding: 15px 25px; 
+
+            border-radius: 20px; 
+
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+
+            display: flex; 
+
+            flex-direction: column; 
+
+            justify-content: center; 
+
+            gap: 8px; 
+
+            border: 1px solid rgba(255,255,255,0.05);
+
+        }
+
+        .res-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; }
+
+        .res-bar-bg { width: 100px; height: 8px; background: #2d2d2d; border-radius: 4px; overflow: hidden; }
+
+        .res-bar-fill { height: 100%; transition: 0.5s; }
+
+
+
+        /* 컨트롤러 패널 다크화 */
+
+        .calendar-controller { 
+
+            background: var(--bg-card); 
+
+            padding: 15px; 
+
+            border-radius: 15px; 
+
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+
+            display: flex; 
+
+            justify-content: center; 
+
+            gap: 15px; 
+
+            flex-wrap: wrap; 
+
+            border: 1px solid rgba(255,255,255,0.05);
+
+        }
+
+        .ctrl-item { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: bold; cursor: pointer; color: var(--main); }
+
+        .ctrl-item input[type="checkbox"] { accent-color: var(--main); } /* 체크박스 컬러 맞춤 */
+
+        
+
+        .main-content { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
+
+        .calendar-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
+
+        
+
+        /* 개별 월(Month) 카드 다크화 */
+
+        .month { 
+
+            background: var(--bg-card); 
+
+            border-radius: 15px; 
+
+            padding: 15px; 
+
+            width: 260px; 
+
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+
+            transition: 0.3s; 
+
+            border: 1px solid rgba(255,255,255,0.03);
+
+        }
+
+        
+
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+
+        th { color: var(--text-sub); font-size: 12px; padding-bottom: 8px; }
+
+        
+
+        /* 날짜 기본 스타일 조정 */
+
+        td { text-align: center; padding: 10px 0; cursor: pointer; font-size: 13px; position: relative; border-radius: 8px; color: #d0d0d0; }
+
+        td:hover { background: rgba(162, 155, 254, 0.15); transform: scale(1.15); z-index: 5; font-weight: bold; color: #fff; }
+
+        
+
+        /* 컬러 지정 시 다크모드 가독성을 위해 테두리 및 텍스트 셰이딩 조정 */
+
+        .is-red { color: #ff7675 !important; font-weight: bold; }
+
+        .is-blue { background: rgba(9, 132, 227, 0.9) !important; color: white !important; font-weight: bold; }
+
+        .is-pink { background: rgba(253, 121, 168, 0.9) !important; color: white !important; font-weight: bold; }
+
+        .is-yellow { background: rgba(253, 203, 110, 0.9) !important; color: #2b1704 !important; font-weight: bold; }
+
+        .is-target { background: rgba(0, 184, 148, 0.9) !important; color: white !important; font-weight: bold; box-shadow: 0 0 10px rgba(0, 184, 148, 0.4); }
+
+        .today { outline: 2px solid var(--main); outline-offset: -2px; color: #fff !important; font-weight: bold; }
+
+        
+
+        /* 일정 메모가 있는 날짜 밑줄 점 표시 */
+
+        .has-memo::after { 
+
+            content: ''; 
+
+            position: absolute; 
+
+            bottom: 4px; 
+
+            left: 50%; 
+
+            transform: translateX(-50%); 
+
+            width: 4px; 
+
+            height: 4px; 
+
+            background: var(--main); 
+
+            border-radius: 50%; 
+
+        }
+
+
+
+        /* 툴팁 다크 모드 연동 */
+
+        .memo-tooltip { 
+
+            visibility: hidden; 
+
+            width: 120px; 
+
+            background-color: #000; 
+
+            color: #fff; 
+
+            text-align: center; 
+
+            border-radius: 6px; 
+
+            padding: 6px; 
+
+            position: absolute; 
+
+            z-index: 100; 
+
+            bottom: 125%; 
+
+            left: 50%; 
+
+            margin-left: -60px; 
+
+            opacity: 0; 
+
+            transition: opacity 0.3s; 
+
+            font-size: 11px; 
+
+            pointer-events: none; 
+
+            font-weight: normal; 
+
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+
+            border: 1px solid rgba(255,255,255,0.1);
+
+        }
+
+        td:hover .memo-tooltip { visibility: visible; opacity: 1; }
+
+        
+
+        /* 우측 D-Day 리스트 패널 다크화 */
+
+        .dday-list-panel { 
+
+            background: var(--bg-card); 
+
+            padding: 25px; 
+
+            border-radius: 20px; 
+
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+
+            position: sticky; 
+
+            top: 20px; 
+
+            max-height: 85vh; 
+
+            overflow-y: auto; 
+
+            border: 1px solid rgba(255,255,255,0.05);
+
+        }
+
+        .dday-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        .dday-badge { background: var(--main); padding: 4px 10px; border-radius: 8px; font-size: 11px; color: #121212; font-weight: 800; }
+
+        
+
+        /* 팝업 모달창 완전 다크 스킨 업그레이드 */
+
+        #select-modal { 
+
+            position: fixed; 
+
+            top: 50%; 
+
+            left: 50%; 
+
+            transform: translate(-50%, -50%); 
+
+            background: #1e1e1e; 
+
+            padding: 30px; 
+
+            border-radius: 25px; 
+
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7); 
+
+            display: none; 
+
+            z-index: 1000; 
+
+            width: 280px; 
+
+            border: 1px solid rgba(255,255,255,0.1);
+
+        }
+
+        .modal-btn { width: 100%; padding: 12px; margin: 5px 0; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+
+        .modal-btn:hover { filter: brightness(1.1); }
+
+        
+
+        .clickable-target { cursor: pointer; padding: 2px 8px; border-radius: 8px; }
+
+        .clickable-target:hover { background: rgba(255,255,255,0.15); }
+
+	.bead-centered {
+    		animation: floatUp 0.5s ease-out forwards;
+  	}
+
+  	@keyframes floatUp {
+    		from { transform: translateY(0); }
+    		to { transform: translateY(-13px); }
+ 	 }
+
+    </style>
+
+</head>
+
+<body>
+
+
+<div class="container">
+
+    <div class="timeline-panel">
+
+        <div id="digital-clock" style="text-align:center; font-size:1.8rem; font-weight:900; margin-bottom:25px; color:var(--main)">00:00:00</div>
+
+        <div class="time-labels"><span>09</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span></div>
+
+        <div class="timeline-track">
+
+            <div class="grid-lines"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+            <div class="base-layer" id="base-layer"></div>
+
+            <div class="passed-layer-mask" id="mask"><div class="passed-layer-content" id="passed-layer"></div></div>
+
+            <div class="pebble" id="pebble"></div>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="dashboard-row">
+
+        <div class="info-card">
+
+            <div class="info-item"><small>남은 일수</small><b id="raw-d">0</b></div>
+
+            <div class="info-item"><small>실질 근무일</small><b id="real-d">0</b></div>
+
+            <div class="info-item">
+
+                <small>전역일</small>
+
+                <b id="target-display" class="clickable-target" onclick="changeTargetDate()">11/16</b>
+
+            </div>
+
+        </div>
+
+        <div class="resource-card">
+
+            <div class="res-row"><span>🏖️ 연차 <span id="v-val">0</span>/13</span><div class="res-bar-bg"><div id="v-bar" class="res-bar-fill" style="background:var(--blue); width:0%"></div></div></div>
+
+            <div class="res-row"><span>⭐ 특휴 <span id="sp-val">0</span>/8</span><div class="res-bar-bg"><div id="sp-bar" class="res-bar-fill" style="background:var(--yellow); width:0%"></div></div></div>
+
+            <div class="res-row"><span>🤒 병가 <span id="s-val">0</span>/13</span><div class="res-bar-bg"><div id="s-bar" class="res-bar-fill" style="background:var(--pink); width:0%"></div></div></div>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="calendar-controller">
+
+        <span style="font-size: 13px; color: var(--text-sub); width: 100%; text-align: center; margin-bottom: 5px;">📅 달력 보기 설정</span>
+
+        <label class="ctrl-item"><input type="checkbox" class="month-toggle" data-month="3" checked onchange="handleToggleChange()"> 4월</label>
+
+        <label class="ctrl-item"><input type="checkbox" class="month-toggle" data-month="4" checked onchange="handleToggleChange()"> 5월</label>
+
+        <label class="ctrl-item"><input type="checkbox" class="month-toggle" data-month="5" checked onchange="handleToggleChange()"> 6월</label>
+
+        <label class="ctrl-item"><input type="checkbox" class="month-toggle" data-month="6" checked onchange="handleToggleChange()"> 7월</label>
+
+        <label class="ctrl-item"><input type="checkbox" class="month-toggle" data-month="7" checked onchange="handleToggleChange()"> 8월</label>
+
+        <label class="ctrl-item"><input type="checkbox" class="month-toggle" data-month="8" checked onchange="handleToggleChange()"> 9월</label>
+
+        <label class="ctrl-item"><input type="checkbox" class="month-toggle" data-month="9" checked onchange="handleToggleChange()"> 10월</label>
+
+        <label class="ctrl-item"><input type="checkbox" class="month-toggle" data-month="10" checked onchange="handleToggleChange()"> 11월</label>
+
+    </div>
+
+
+
+    <div class="main-content">
+
+        <div id="calendar-area" class="calendar-grid"></div>
+
+        <div class="dday-list-panel">
+
+            <h3 style="margin:0 0 15px 0; font-size:1.1rem; color:var(--main)">📌 일정별 D-Day</h3>
+
+            <div id="memo-dday-list"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<div id="select-modal">
+
+    <h4 style="margin:0 0 15px 0; color:var(--main)">날짜 편집</h4>
+
+    <button class="modal-btn" style="background:var(--red); color:white;" onclick="applyAction('red')">🚩 빨간날 지정</button>
+
+    <button class="modal-btn" style="background:var(--blue); color:white;" onclick="applyAction('vacation')">🏖️ 연차 지정 (파랑)</button>
+
+    <button class="modal-btn" style="background:var(--yellow); color:#7f5500;" onclick="applyAction('special')">⭐ 특휴 지정 (노랑)</button>
+
+    <button class="modal-btn" style="background:var(--pink); color:white;" onclick="applyAction('sick')">🤒 병가 지정 (핑크)</button>
+
+    <div style="border-top:1px solid rgba(255,255,255,0.1); margin:10px 0; padding-top:10px;">
+
+        <button class="modal-btn" style="background:var(--main); color:#121212;" onclick="applyAction('memo')">📝 일정/D-Day 설정</button>
+
+    </div>
+
+    <button class="modal-btn" style="background:#2d2d2d; color:#fff;" onclick="applyAction('clear')">🔄 초기화</button>
+
+    <button class="modal-btn" style="background:#444; color:#fff;" onclick="closeModal()">닫기</button>
+
+</div>
+
+
+
+<script>
+
+    var db = JSON.parse(localStorage.getItem('my_final_db_v11') || '{}');
+
+    Object.assign(db, JSON.parse(localStorage.getItem('my_final_db_v12') || '{}'));
+
+    Object.assign(db, JSON.parse(localStorage.getItem('my_final_db_v13') || '{}'));
+
+
+
+    var savedTarget = localStorage.getItem('my_target_date') || "2026-11-16";
+
+    var targetDate = new Date(savedTarget);
+
+    var selectedDates = []; 
+
+    var isDragging = false;
+
+
+
+    const holidays2026 = ["1-1", "2-16", "2-17", "2-18", "3-1", "5-5", "5-24", "6-6", "8-15", "9-24", "9-25", "9-26", "10-3", "10-9", "12-25"];
+
+
+
+    function loadToggleStates() {
+
+        var savedStates = JSON.parse(localStorage.getItem('my_calendar_toggles') || '{}');
+
+        document.querySelectorAll('.month-toggle').forEach(el => {
+
+            var m = el.getAttribute('data-month');
+
+            if (savedStates[m] !== undefined) {
+
+                el.checked = savedStates[m];
+
+            }
+
+        });
+
+    }
+
+
+
+    function handleToggleChange() {
+
+        var states = {};
+
+        document.querySelectorAll('.month-toggle').forEach(el => {
+
+            states[el.getAttribute('data-month')] = el.checked;
+
+        });
+
+        localStorage.setItem('my_calendar_toggles', JSON.stringify(states));
+
+        render();
+
+    }
+
+
+
+    function changeTargetDate() {
+
+        var newDate = prompt("새로운 전역일을 입력하세요 (YYYY-MM-DD):", savedTarget);
+
+        if (newDate && !isNaN(Date.parse(newDate))) {
+
+            localStorage.setItem('my_target_date', newDate);
+
+            savedTarget = newDate;
+
+            targetDate = new Date(newDate);
+
+            targetDate.setHours(0,0,0,0); 
+
+            render();
+
+        }
+
+    }
+
+
+
+    function buildTimeline() {
+
+        var now = new Date(); var day = now.getDay();
+
+        [document.getElementById('base-layer'), document.getElementById('passed-layer')].forEach(layer => {
+
+            layer.innerHTML = '';
+
+            var y1 = document.createElement('div'); y1.className = 'zone-y'; y1.style.width = "27.77%"; layer.appendChild(y1);
+
+            var b1 = document.createElement('div'); b1.className = 'zone-b'; b1.style.width = "11.11%"; layer.appendChild(b1);
+
+            if(day >= 1 && day <= 2) { 
+
+                var y2 = document.createElement('div'); y2.className = 'zone-y'; y2.style.width = "25%"; layer.appendChild(y2); 
+
+                var r1 = document.createElement('div'); r1.className = 'zone-r'; r1.style.width = "19.45%"; layer.appendChild(r1); 
+
+                var y3 = document.createElement('div'); y3.className = 'zone-y'; y3.style.width = "16.67%"; layer.appendChild(y3); 
+
+            } else if(day >= 3 && day <= 5) { 
+
+                var y2 = document.createElement('div'); y2.className = 'zone-y'; y2.style.width = "16.67%"; layer.appendChild(y2); 
+
+                var r1 = document.createElement('div'); r1.className = 'zone-r'; r1.style.width = "27.77%"; layer.appendChild(r1); 
+
+                var y3 = document.createElement('div'); y3.className = 'zone-y'; y3.style.width = "16.67%"; layer.appendChild(y3); 
+
+            } else { var y2 = document.createElement('div'); y2.className = 'zone-y'; y2.style.width = "61.12%"; layer.appendChild(y2); }
+
+        });
+
+    }
+
+
+
+    function updateTimeline() {
+
+        var now = new Date();
+
+        document.getElementById('digital-clock').innerText = now.toLocaleTimeString('ko-KR', { hour12: false });
+
+        var start = 540, end = 1080; var curr = now.getHours() * 60 + now.getMinutes() + (now.getSeconds() / 60);
+
+        var pct = Math.max(0, Math.min(100, ((curr - start) / (end - start)) * 100));
+
+        document.getElementById('pebble').style.left = pct + "%";
+
+        document.getElementById('mask').style.width = pct + "%";
+
+    }
+
+
+
+function render() {
+        var area = document.getElementById('calendar-area'); area.innerHTML = '';
+        var listArea = document.getElementById('memo-dday-list'); listArea.innerHTML = '';
+        var today = new Date(); today.setHours(0,0,0,0);
+        targetDate.setHours(0,0,0,0); 
+        
+        // 1. 근무일 인덱스 생성 (workingDaysMap)
+        var workingDaysMap = {};
+	var count = 0;
+// 4월 1일 시작 (JS 월은 0부터 시작하므로 3이 4월)
+var loopDate = new Date(2026, 3, 1); 
+loopDate.setHours(0,0,0,0);
+// 11월 30일 종료 (JS 월은 0부터 시작하므로 10이 11월)
+var endDate = new Date(2026, 10, 30); 
+endDate.setHours(0,0,0,0);
+
+while (loopDate <= endDate) {
+    var dStr = loopDate.getFullYear() + "-" + (loopDate.getMonth() + 1) + "-" + loopDate.getDate();
+    var dayInfo = db[dStr] || {};
+    var dow = loopDate.getDay();
+    var isHol = holidays2026.includes((loopDate.getMonth()+1)+"-"+loopDate.getDate());
+
+    // 근무일 조건: 주말 제외, 빨간날 제외, 휴가(연차/병가 등) 제외
+    if (dow !== 0 && dow !== 6 && !dayInfo.isRed && !isHol && !dayInfo.type) {
+        count++;
+        workingDaysMap[dStr] = count;
+    }
+    loopDate.setDate(loopDate.getDate() + 1);
+}
+
+// 2. 현재일(오늘) 인덱스 찾기 (보정 로직 추가)
+todayStr = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
+
+var todayIdx = 0;
+var tempDate = new Date(today);
+// 인덱스를 찾을 때까지 최대 30일 전까지 거꾸로 탐색 (주말/휴가 고려)
+for (var i = 0; i < 30; i++) {
+    var dStr = tempDate.getFullYear() + "-" + (tempDate.getMonth() + 1) + "-" + tempDate.getDate();
+    if (workingDaysMap[dStr]) {
+        todayIdx = workingDaysMap[dStr];
+        break;
+    }
+    tempDate.setDate(tempDate.getDate() - 1);
+}
+
+// 3. 오늘부터 전역일까지의 남은 실근무일 계산
+// 오늘이 이미 지났거나 근무일이 아니더라도, 마지막 근무일 기준으로 계산
+// 1. 기존의 count를 이용한 계산 대신, 전역일(targetDate)의 인덱스를 찾아냅니다.
+var targetStr = targetDate.getFullYear() + "-" + (targetDate.getMonth() + 1) + "-" + targetDate.getDate();
+var targetIdx = workingDaysMap[targetStr];
+
+// 만약 전역일이 주말/공휴일이라 인덱스가 없다면, 
+// 그 전날 근무일 인덱스를 가져오도록 보정 (위에서 todayIdx 구한 것과 같은 원리)
+if (!targetIdx) {
+    var tempTargetDate = new Date(targetDate);
+    for (var i = 0; i < 40; i++) {
+        var dStr = tempTargetDate.getFullYear() + "-" + (tempTargetDate.getMonth() + 1) + "-" + tempTargetDate.getDate();
+        if (workingDaysMap[dStr]) {
+            targetIdx = workingDaysMap[dStr];
+            break;
+        }
+        tempTargetDate.setDate(tempTargetDate.getDate() - 1);
+    }
+}
+
+// 2. 남은 근무일 계산: (전역일 근무 인덱스) - (오늘 근무 인덱스) + 1
+// 오늘이 전역일보다 이후라면 0, 아니면 차이만큼 계산
+var remainingWorkingDays = Math.max(0, targetIdx - todayIdx + 1);
+
+// 3. 화면 표시
+document.getElementById('real-d').innerText = remainingWorkingDays + "일";
+// 오늘이 오늘 기준으로 이미 근무한 날이라면 1을 빼주어야 할 수도 있습니다. 
+// 현재 상황에서는 '오늘 포함 남은 일수'를 계산하기 위함입니다.
+
+// 4. 화면 표시
+document.getElementById('real-d').innerText = remainingWorkingDays + "일";
+console.log("오늘 인덱스:", todayIdx, "전체 근무일:", count);
+
+        // 3. 기존 달력 렌더링 로직 (vUsed, sUsed 계산 포함)
+        var vUsed = 0, sUsed = 0, spUsed = 0;
+        var ddayItems = [];
+        var toggleMap = {};
+        document.querySelectorAll('.month-toggle').forEach(el => {
+            toggleMap[el.getAttribute('data-month')] = el.checked;
+        });
+
+        document.getElementById('target-display').innerText = (targetDate.getMonth()+1) + "/" + targetDate.getDate();
+
+        for (var m = 3; m <= 10; m++) {
+            var isVisible = toggleMap[m] ? "display:block" : "display:none";
+            var html = `<div class="month" style="${isVisible}"><div style="text-align:center; font-weight:800; margin-bottom:10px; color:var(--main)">${m+1}월</div><table><tr><th>일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th></tr><tr>`;
+            var first = new Date(2026, m, 1).getDay(), last = new Date(2026, m + 1, 0).getDate();
+            for (var i = 0; i < first; i++) html += '<td></td>';
+            for (var d = 1; d <= last; d++) {
+                var dStr = "2026-" + (m + 1) + "-" + d;
+                var curD = new Date(2026, m, d);
+                curD.setHours(0,0,0,0);
+                var info = db[dStr] || {};
+                var cls = [];
+                if (curD.getDay() === 0 || info.isRed || holidays2026.includes((m+1)+"-"+d)) cls.push('is-red');
+                if (info.type === 'vacation') { cls.push('is-blue'); vUsed++; }
+                if (info.type === 'special') { cls.push('is-yellow'); spUsed++; }
+                if (info.type === 'sick') { cls.push('is-pink'); sUsed++; }
+                if (curD.getTime() === targetDate.getTime()) cls.push('is-target');
+                if (curD.getTime() === today.getTime()) cls.push('today');
+                
+                var tooltip = "";
+                if (info.memo) {
+                    cls.push('has-memo');
+                    tooltip = `<span class="memo-tooltip">${info.memo}</span>`;
+                    if (info.useDday) ddayItems.push({ date: curD, text: info.memo });
+                }
+                html += `<td class="${cls.join(' ')}" onmousedown="startDrag('${dStr}')" onmouseover="doDrag('${dStr}')">${d}${tooltip}</td>`;
+                if ((d + first) % 7 === 0) html += '</tr><tr>';
+            }
+            area.innerHTML += html + '</tr></table></div>';
+        }
+
+        document.getElementById('v-val').innerText = vUsed;
+        document.getElementById('v-bar').style.width = (vUsed / 13 * 100) + "%";
+        document.getElementById('sp-val').innerText = spUsed;
+        document.getElementById('sp-bar').style.width = (spUsed / 8 * 100) + "%";
+        document.getElementById('s-val').innerText = sUsed;
+        document.getElementById('s-bar').style.width = (sUsed / 13 * 100) + "%";
+
+        var rawDiff = Math.ceil((targetDate - today) / 86400000);
+        document.getElementById('raw-d').innerText = rawDiff > 0 ? "D-" + rawDiff : (rawDiff === 0 ? "D-Day" : "D+" + Math.abs(rawDiff));
+
+        ddayItems.sort((a,b) => a.date - b.date);
+        ddayItems.forEach(item => {
+            var diff = Math.ceil((item.date - today) / 86400000);
+            var dTag = diff === 0 ? "D-Day" : (diff > 0 ? "D-" + diff : "D+" + Math.abs(diff));
+            listArea.innerHTML += `<div class="dday-item"><div><b>${item.text}</b><br><small style="color:#b2bec3">${(item.date.getMonth()+1)}월 ${item.date.getDate()}일</small></div><span class="dday-badge">${dTag}</span></div>`;
+        });
+	localStorage.setItem('shared_working_map', JSON.stringify(workingDaysMap));
+	console.log("저장된 데이터 확인:", JSON.parse(localStorage.getItem('shared_working_map')));  
+  }
+
+
+
+    function startDrag(d) { isDragging = true; selectedDates = [d]; }
+
+    function doDrag(d) { if(isDragging && !selectedDates.includes(d)) selectedDates.push(d); }
+
+    window.onmouseup = function() { if(isDragging) { document.getElementById('select-modal').style.display = 'block'; } isDragging = false; };
+
+    
+
+    function applyAction(action) {
+
+        if(action === 'memo') {
+
+            var firstDate = selectedDates[0];
+
+            var currentMemo = db[firstDate]?.memo || "";
+
+            var newMemo = prompt("일정 내용을 입력하세요:", currentMemo);
+
+            if (newMemo !== null) {
+
+                var useDday = confirm("이 일정을 우측 D-Day 리스트에 표시할까요?");
+
+                selectedDates.forEach(d => { if(!db[d]) db[d]={}; db[d].memo = newMemo; db[d].useDday = useDday; });
+
+            }
+
+        } 
+
+        else if(action === 'red') selectedDates.forEach(d => { if(!db[d]) db[d]={}; db[d].isRed = !db[d].isRed; });
+
+        else if(action === 'vacation') selectedDates.forEach(d => { if(!db[d]) db[d]={}; db[d].type = (db[d].type === 'vacation' ? null : 'vacation'); });
+
+        else if(action === 'special') selectedDates.forEach(d => { if(!db[d]) db[d]={}; db[d].type = (db[d].type === 'special' ? null : 'special'); });
+
+        else if(action === 'sick') selectedDates.forEach(d => { if(!db[d]) db[d]={}; db[d].type = (db[d].type === 'sick' ? null : 'sick'); });
+
+        else if(action === 'clear') selectedDates.forEach(d => delete db[d]);
+
+        
+
+        localStorage.setItem('my_final_db_v13', JSON.stringify(db));
+
+        closeModal(); render();
+
+    }
+
+    function closeModal() { document.getElementById('select-modal').style.display = 'none'; selectedDates = []; }
+
+
+
+    buildTimeline(); 
+
+    setInterval(updateTimeline, 1000); 
+
+    updateTimeline(); 
+
+    loadToggleStates(); 
+
+    render();
+
+
+</script>
+
+<div id="necklace-wrapper" style="margin: 40px auto; padding: 20px; background: #121212; border-radius: 20px; text-align: center; max-width: 1000px; user-select: none; position: relative; border: 1px solid #333;" tabindex="0">
+    <!-- 상단 컨트롤 영역 (조절바, 슬롯, 최소화 버튼) -->
+    <div style="position: absolute; top: 15px; right: 20px; display: flex; gap: 6px; align-items: center;">
+        <!-- 최소화 모드 전용 크기 조절바 (슬롯 왼쪽 배치) -->
+        <div id="mini-size-control" style="display: none; align-items: center; gap: 4px; background: #1a1a1a; padding: 2px 6px; border: 1px solid #444; border-radius: 4px;">
+            <span style="font-size: 9px; color: #888;">Dot Size</span>
+            <input type="range" id="mini-size-slider" min="0.2" max="2.0" step="0.05" value="0.5" style="width: 50px; cursor: pointer; accent-color: #00b894;">
+        </div>
+
+        <div id="slot-container" style="display: flex; gap: 4px;">
+            <button class="slot-btn" data-index="0" style="background: #222; color: #aaa; border: 1px solid #444; border-radius: 4px; padding: 2px 6px; font-size: 11px; cursor: pointer;">Slot 1</button>
+            <button class="slot-btn" data-index="1" style="background: #222; color: #aaa; border: 1px solid #444; border-radius: 4px; padding: 2px 6px; font-size: 11px; cursor: pointer;">Slot 2</button>
+            <button class="slot-btn" data-index="2" style="background: #222; color: #aaa; border: 1px solid #444; border-radius: 4px; padding: 2px 6px; font-size: 11px; cursor: pointer;">Slot 3</button>
+        </div>
+        <button id="minimize-btn" style="background: #333; color: #fff; border: none; border-radius: 4px; width: 28px; height: 28px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s;">-</button>
+    </div>
+
+    <div id="arrow-indicator" style="font-size: 24px; color: #ff7675; margin-bottom: 5px;">▼</div>
+    <div id="date-label" style="color: #eee; margin-bottom: 20px; font-weight: bold; letter-spacing: 1px;">2026/07/14</div>
+    <div id="bead-container" style="display: flex; justify-content: center; gap: 18px; height: 100px; align-items: center; cursor: grab; overflow: hidden; transition: 0.3s;" tabindex="0"></div>
+
+    <!-- 슬롯 설정/초기화 모달 팝업 -->
+    <div id="slot-modal" style="display: none; position: absolute; top: 60px; right: 20px; background: #1e1e1e; border: 1px solid #555; padding: 12px; border-radius: 8px; z-index: 10; text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+        <div style="font-size: 12px; color: #fff; margin-bottom: 8px; font-weight: bold;" id="modal-title">슬롯 설정</div>
+        <div style="font-size: 11px; color: #ccc; margin-bottom: 4px;">시작 날짜 (YYYY/MM/DD)</div>
+        <input type="text" id="modal-start" style="width: 120px; background: #111; color: #fff; border: 1px solid #444; padding: 3px; font-size: 11px; margin-bottom: 8px; border-radius: 3px;"><br>
+        <div style="font-size: 11px; color: #ccc; margin-bottom: 4px;">끝 날짜 (YYYY/MM/DD)</div>
+        <input type="text" id="modal-end" style="width: 120px; background: #111; color: #fff; border: 1px solid #444; padding: 3px; font-size: 11px; margin-bottom: 10px; border-radius: 3px;"><br>
+        <div style="display: flex; justify-content: space-between;">
+            <button id="modal-reset" style="background: #e74c3c; color: #fff; border: none; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">초기화</button>
+            <div>
+                <button id="modal-cancel" style="background: #444; color: #fff; border: none; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer; margin-right: 4px;">취소</button>
+                <button id="modal-save" style="background: #00b894; color: #fff; border: none; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">저장</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    let current = new Date();
+    let isMinimized = false;
+    
+    let miniDotScale = 0.5;
+    try {
+        let savedScale = localStorage.getItem('necklace_dot_scale');
+        if (savedScale !== null) {
+            miniDotScale = parseFloat(savedScale);
+        }
+    } catch(e) { miniDotScale = 0.5; }
+    
+    let slots = [null, null, null];
+    try {
+        let savedSlots = JSON.parse(localStorage.getItem('necklace_slots'));
+        if (savedSlots) {
+            slots = savedSlots.map(s => s ? { start: new Date(s.start), end: new Date(s.end) } : null);
+        }
+    } catch(e) { slots = [null, null, null]; }
+
+    let activeSlotIndex = null;
+    let longPressTimer = null;
+
+    const wrapper = document.getElementById('necklace-wrapper');
+    const container = document.getElementById('bead-container');
+    const label = document.getElementById('date-label');
+    const minimizeBtn = document.getElementById('minimize-btn');
+    const arrowIndicator = document.getElementById('arrow-indicator');
+    const slotBtns = document.querySelectorAll('.slot-btn');
+    const miniSizeControl = document.getElementById('mini-size-control');
+    const miniSizeSlider = document.getElementById('mini-size-slider');
+    
+    miniSizeSlider.value = miniDotScale;
+
+    const slotModal = document.getElementById('slot-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalStart = document.getElementById('modal-start');
+    const modalEnd = document.getElementById('modal-end');
+    const modalSave = document.getElementById('modal-save');
+    const modalReset = document.getElementById('modal-reset');
+    const modalCancel = document.getElementById('modal-cancel');
+    const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+    let isDown = false, startX;
+
+    const formatDate = (date) => {
+        let y = date.getFullYear();
+        let m = String(date.getMonth() + 1).padStart(2, '0');
+        let d = String(date.getDate()).padStart(2, '0');
+        return `${y}/${m}/${d}`;
+    };
+
+    slots.forEach((slot, idx) => {
+        if (slot) {
+            let btn = slotBtns[idx];
+            btn.style.color = "#00b894";
+            btn.style.borderColor = "#00b894";
+            btn.innerText = `S${idx+1}: ${formatDate(slot.start).slice(5)}`;
+        }
+    });
+
+    const saveSlotsToStorage = () => {
+        let rawSlots = slots.map(s => s ? { start: s.start.toISOString(), end: s.end.toISOString() } : null);
+        localStorage.setItem('necklace_slots', JSON.stringify(rawSlots));
+    };
+
+    miniSizeSlider.oninput = (e) => {
+        miniDotScale = parseFloat(e.target.value);
+        localStorage.setItem('necklace_dot_scale', miniDotScale);
+        render();
+    };
+
+    const getBeadStyleInfo = (d) => {
+        let dStr = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+        let localDb = {};
+        try {
+            localDb = JSON.parse(localStorage.getItem('necklace_db')) || (typeof db !== 'undefined' ? db : {});
+        } catch (e) {
+            localDb = (typeof db !== 'undefined' ? db : {});
+        }
+        let info = localDb[dStr] || (typeof db !== 'undefined' && db[dStr]) || {};
+
+        let isTarget = (typeof targetDate !== 'undefined' && targetDate && d.toDateString() === targetDate.toDateString());
+        let isRedDay = info.isRed || (typeof holidays2026 !== 'undefined' && holidays2026.includes((d.getMonth()+1)+"-"+d.getDate()));
+        let isWeekend = (d.getDay() === 0 || d.getDay() === 6);
+
+        let color = "#ffffff";
+        if (isTarget) color = "#00b894";
+        else if (info.type === 'vacation') color = "#0984e3";
+        else if (info.type === 'sick') color = "#fd79a8";
+        else if (info.type === 'special') color = "#fdcb6e";
+        else if (isRedDay) color = "#e74c3c";
+        else if (isWeekend) color = "#2d2d2d";
+
+        return { color, info };
+    };
+
+    slotBtns.forEach((btn, idx) => {
+        let isLongPress = false;
+
+        btn.onpointerdown = (e) => {
+            e.stopPropagation();
+            isLongPress = false;
+            longPressTimer = setTimeout(() => {
+                isLongPress = true;
+                openModal(idx);
+            }, 800);
+        };
+
+        btn.onpointerup = (e) => {
+            e.stopPropagation();
+            clearTimeout(longPressTimer);
+        };
+
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            if (isLongPress) return;
+
+            if (!slots[idx]) {
+                let sInput = prompt("시작 날짜를 입력하세요 (YYYY/MM/DD):", formatDate(current));
+                if (!sInput) return;
+                let eInput = prompt("끝 날짜를 입력하세요 (YYYY/MM/DD):", formatDate(new Date(current.getTime() + 14 * 86400000)));
+                if (!eInput) return;
+
+                slots[idx] = { start: new Date(sInput.replace(/-/g, '/')), end: new Date(eInput.replace(/-/g, '/')) };
+                saveSlotsToStorage();
+                updateSlotUI(idx);
+            }
+            
+            current = new Date(slots[idx].start);
+            if (!isMinimized) {
+                isMinimized = true;
+                minimizeBtn.innerText = "+";
+                arrowIndicator.style.display = "none";
+                miniSizeControl.style.display = "flex";
+            }
+            render();
+        };
+
+        btn.oncontextmenu = (e) => e.preventDefault();
+    });
+
+    function openModal(idx) {
+        activeSlotIndex = idx;
+        modalTitle.innerText = `Slot ${idx + 1} 설정 / 초기화`;
+        modalStart.value = slots[idx] ? formatDate(slots[idx].start) : formatDate(current);
+        modalEnd.value = slots[idx] ? formatDate(slots[idx].end) : formatDate(new Date());
+        slotModal.style.display = "block";
+    }
+
+    modalCancel.onclick = () => { slotModal.style.display = "none"; };
+    
+    modalSave.onclick = () => {
+        if (activeSlotIndex !== null) {
+            let sVal = modalStart.value.replace(/-/g, '/');
+            let eVal = modalEnd.value.replace(/-/g, '/');
+            slots[activeSlotIndex] = { start: new Date(sVal), end: new Date(eVal) };
+            saveSlotsToStorage();
+            updateSlotUI(activeSlotIndex);
+        }
+        slotModal.style.display = "none";
+    };
+
+    modalReset.onclick = () => {
+        if (activeSlotIndex !== null) {
+            slots[activeSlotIndex] = null;
+            saveSlotsToStorage();
+            slotBtns[activeSlotIndex].style.color = "#aaa";
+            slotBtns[activeSlotIndex].style.borderColor = "#444";
+            slotBtns[activeSlotIndex].innerText = `Slot ${activeSlotIndex + 1}`;
+        }
+        slotModal.style.display = "none";
+        render();
+    };
+
+    function updateSlotUI(idx) {
+        let btn = slotBtns[idx];
+        btn.style.color = "#00b894";
+        btn.style.borderColor = "#00b894";
+        btn.innerText = `S${idx+1}: ${formatDate(slots[idx].start).slice(5)}`;
+    }
+
+    minimizeBtn.onclick = () => {
+        isMinimized = !isMinimized;
+        minimizeBtn.innerText = isMinimized ? "+" : "-";
+        arrowIndicator.style.display = isMinimized ? "none" : "block";
+        miniSizeControl.style.display = isMinimized ? "flex" : "none";
+        render();
+    };
+
+    const render = () => {
+        container.innerHTML = '';
+        label.innerText = formatDate(current);
+        
+        if (isMinimized) {
+            container.style.display = "grid";
+            container.style.gridTemplateColumns = "repeat(7, 1fr)";
+            container.style.gap = "6px";
+            container.style.height = "auto";
+            container.style.padding = "10px 0";
+
+            days.forEach(day => {
+                let h = document.createElement('div');
+                h.innerText = day;
+                h.style.fontSize = "9px";
+                h.style.color = "#888";
+                h.style.fontWeight = "bold";
+                container.appendChild(h);
+            });
+
+            let startDate = new Date(current);
+            startDate.setDate(startDate.getDate() - startDate.getDay());
+            let endDate = new Date(current.getFullYear(), 11, 31);
+
+            let activeSlot = slots.find(s => s !== null && current >= s.start && current <= s.end);
+            if (activeSlot) {
+                startDate = new Date(activeSlot.start);
+                startDate.setDate(startDate.getDate() - startDate.getDay());
+                endDate = new Date(activeSlot.end);
+            }
+
+            let d = new Date(startDate);
+            while (d <= endDate) {
+                let currentDateObj = new Date(d);
+                let isCurrentCenter = (currentDateObj.toDateString() === current.toDateString());
+                let isToday = (currentDateObj.toDateString() === new Date().toDateString());
+
+                let cell = document.createElement('div');
+                cell.style.display = "flex";
+                cell.style.flexDirection = "column";
+                cell.style.alignItems = "center";
+                cell.style.height = Math.max(22, Math.round(miniDotScale * 28)) + "px";
+                cell.style.justifyContent = "center";
+                cell.style.position = "relative";
+
+                if (isCurrentCenter) {
+                    let miniArrow = document.createElement('div');
+                    miniArrow.innerText = "▼";
+                    miniArrow.style.fontSize = "8px";
+                    miniArrow.style.color = "#ff7675";
+                    miniArrow.style.position = "absolute";
+                    miniArrow.style.top = "-2px";
+                    cell.appendChild(miniArrow);
+                }
+
+                let styleInfo = getBeadStyleInfo(currentDateObj);
+                let b = document.createElement('div');
+                b.style.background = styleInfo.color;
+                b.style.borderRadius = "50%";
+                b.style.cursor = "pointer";
+                
+                let sizePx = Math.round(miniDotScale * 14) + "px";
+                b.style.width = sizePx;
+                b.style.height = sizePx;
+
+                // 오늘 날짜: 강렬한 보라색 글로우 + 선명한 보라색 테두리 적용
+                if (isToday) {
+                    b.style.border = "2px solid #a29bfe";
+                    b.style.boxShadow = "0 0 8px 2px #a29bfe";
+                }
+
+                b.title = formatDate(currentDateObj);
+
+                cell.appendChild(b);
+                container.appendChild(cell);
+
+                d.setDate(d.getDate() + 1);
+            }
+        } else {
+            container.style.display = "flex";
+            container.style.justifyContent = "center";
+            container.style.gap = "18px";
+            container.style.height = "100px";
+            container.style.alignItems = "center";
+
+            for (let i = -13; i <= 13; i++) {
+                let d = new Date(current);
+                d.setDate(d.getDate() + i);
+                let currentDateObj = new Date(d);
+                let isToday = (currentDateObj.toDateString() === new Date().toDateString());
+
+                let bWrap = document.createElement('div');
+                bWrap.style.display = "flex";
+                bWrap.style.flexDirection = "column";
+                bWrap.style.alignItems = "center";
+                bWrap.style.gap = "20px";
+                bWrap.style.cursor = "pointer";
+
+                bWrap.onclick = () => {
+                    current = new Date(currentDateObj);
+                    render();
+                };
+
+                if (isToday) {
+                    let todayLabel = document.createElement('div');
+                    todayLabel.innerText = "TODAY";
+                    todayLabel.style.fontSize = "10px";
+                    todayLabel.style.color = "#a29bfe";
+                    todayLabel.style.fontWeight = "bold";
+                    bWrap.appendChild(todayLabel);
+                } else {
+                    let spacer = document.createElement('div');
+                    spacer.style.height = "12px";
+                    bWrap.appendChild(spacer);
+                }
+
+                let styleInfo = getBeadStyleInfo(currentDateObj);
+                let b = document.createElement('div');
+                b.style.background = styleInfo.color;
+                b.style.borderRadius = "50%";
+                b.style.transition = "0.2s";
+
+                b.style.width = (styleInfo.color === "#ffffff" ? "30px" : "12px");
+                b.style.height = b.style.width;
+
+                if (isToday) {
+                    b.style.border = "2px solid #a29bfe";
+                    b.style.boxShadow = "0 0 10px 3px #a29bfe";
+                }
+
+                b.title = formatDate(currentDateObj);
+
+                if (i === 0) {
+                    b.classList.add('bead-centered');
+                }
+                bWrap.appendChild(b);
+
+                let dayLabel = document.createElement('div');
+                dayLabel.innerText = days[currentDateObj.getDay()];
+                dayLabel.style.fontSize = "10px";
+                dayLabel.style.color = "#666";
+                bWrap.appendChild(dayLabel);
+                
+                container.appendChild(bWrap);
+            }
+        }
+    };
+
+    wrapper.setAttribute('tabindex', '0');
+    wrapper.onkeydown = (e) => {
+        if (isMinimized) return;
+        if (e.key === 'ArrowLeft') {
+            current.setDate(current.getDate() - 1);
+            render();
+        } else if (e.key === 'ArrowRight') {
+            current.setDate(current.getDate() + 1);
+            render();
+        }
+    };
+
+    container.onmousedown = (e) => { 
+        if (isMinimized) return;
+        e.stopPropagation();
+        isDown = true; startX = e.pageX;
+    };
+    container.onmousemove = (e) => {
+        if (!isDown || isMinimized) return;
+        let diff = e.pageX - startX;
+        if (Math.abs(diff) > 30) {
+            current.setDate(current.getDate() + (diff > 0 ? -1 : 1));
+            render();
+            startX = e.pageX;
+        }
+    };
+    container.onmouseup = () => { isDown = false; };
+    render();
+})();
+</script>
+
+</script>
+
+<button onclick="exportAllData()">데이터 백업하기 (Export)</button>
+
+    <script>
+        // 1. 앞서 드린 Export 함수 코드 통째로 넣기
+        function exportAllData() {
+            const allData = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                try {
+                    allData[key] = JSON.parse(localStorage.getItem(key));
+                } catch (e) {
+                    allData[key] = localStorage.getItem(key);
+                }
+            }
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "my_tools_backup.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+    </script>
+
+</body>
+
+</html>
