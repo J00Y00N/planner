@@ -738,7 +738,7 @@
 
 
 
-    function loadToggleStates() {
+        function loadToggleStates() {
 
         var savedStates = JSON.parse(localStorage.getItem('my_calendar_toggles') || '{}');
 
@@ -749,6 +749,15 @@
             if (savedStates[m] !== undefined) {
 
                 el.checked = savedStates[m];
+
+} else {
+                // 👇 [하드코딩 영역] 기본으로 켜고 싶은 월 지정 (예: 8월, 9월, 10월, 11월에 해당하는 data-month 값)
+                // 만약 data-month가 '7', '8', '9', '10'이라면:
+                if (m === '7' || m === '8' || m === '9' || m === '10') {
+                    el.checked = true;
+                } else {
+                    el.checked = false;
+                }
 
             }
 
