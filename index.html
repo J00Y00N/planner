@@ -727,13 +727,7 @@
 
 <script>
 
-    var db = JSON.parse(localStorage.getItem('my_final_db_v11') || '{}');
-
-    Object.assign(db, JSON.parse(localStorage.getItem('my_final_db_v12') || '{}'));
-
-    Object.assign(db, JSON.parse(localStorage.getItem('my_final_db_v13') || '{}'));
-
-
+    var db = JSON.parse(localStorage.getItem('my_final_db_v13') || '{}');
 
     var savedTarget = localStorage.getItem('my_target_date') || "2026-11-16";
 
@@ -764,7 +758,7 @@
 } else {
                 // 👇 [하드코딩 영역] 기본으로 켜고 싶은 월 지정 (예: 8월, 9월, 10월, 11월에 해당하는 data-month 값)
                 // 만약 data-month가 '7', '8', '9', '10'이라면:
-                if (m === '7' || m === '8' || m === '9' || m === '10') {
+                if (m === '8' || m === '9') {
                     el.checked = true;
                 } else {
                     el.checked = false;
