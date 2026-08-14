@@ -881,6 +881,7 @@ function render() {
         // 1. 근무일 인덱스 생성 (workingDaysMap)
         var workingDaysMap = {};
 	var count = 0;
+	var halfVacationCount = 0;
 // 4월 1일 시작 (JS 월은 0부터 시작하므로 3이 4월)
 var loopDate = new Date(2026, 3, 1); 
 loopDate.setHours(0,0,0,0);
@@ -891,19 +892,24 @@ endDate.setHours(0,0,0,0);
 while (loopDate <= endDate) {
     var dStr = loopDate.getFullYear() + "-" + (loopDate.getMonth() + 1) + "-" + loopDate.getDate();
     var dayInfo = db[dStr] || {};
+
+if (dayInfo.type === 'half_vacation' || dayInfo.type === 'half_sick') {
+        halfVacationCount++;
+    }
+
     var dow = loopDate.getDay();
     var isHol = holidays2026.includes((loopDate.getMonth()+1)+"-"+loopDate.getDate());
 
-var isFullDayOff = dayInfo.type === 'vacation' || dayInfo.type === 'sick' || dayInfo.type === 'special';	
+var isFullDayOff = (dayInfo.type === 'vacation' || dayInfo.type === 'sick' || dayInfo.type === 'special');	
 
-    // 근무일 조건: 주말 제외, 빨간날 제외, 휴가(연차/병가 등) 제외
-    if (dow !== 0 && dow !== 6 && !dayInfo.isRed && !isHol && !dayInfo.type) {
+    // 근무일 조건: 주말 제외, 빨간날 제외, 휴가(연차/병가 등) 제외	
+    if (dow !== 0 && dow !== 6 && !dayInfo.isRed && !isHol && !isFullDayOff) {
         count++;
         workingDaysMap[dStr] = count;
     }
     loopDate.setDate(loopDate.getDate() + 1);
 }
-
+	
 // 2. 현재일(오늘) 인덱스 찾기 (보정 로직 추가)
 todayStr = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
 
@@ -942,6 +948,8 @@ if (!targetIdx) {
 // 2. 남은 근무일 계산: (전역일 근무 인덱스) - (오늘 근무 인덱스) + 1
 // 오늘이 전역일보다 이후라면 0, 아니면 차이만큼 계산
 var remainingWorkingDays = Math.max(0, targetIdx - todayIdx + 1);
+var reduction = Math.floor(halfVacationCount / 2);
+remainingWorkingDays = Math.max(0, remainingWorkingDays - reduction);	
 
 // 3. 화면 표시
 document.getElementById('real-d').innerText = remainingWorkingDays + "일";
