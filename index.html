@@ -614,6 +614,14 @@
 
             <div id="memo-dday-list"></div>
 
+			<div id="dynamic-match-panel" style="margin-top: 20px; background: linear-gradient(135deg, #2d3436 0%, #1e272e 100%); border: 2px solid #555; border-radius: 15px; padding: 15px; text-align: center; box-shadow: 0 0 10px rgba(0,0,0,0.5); position: relative; overflow: hidden; opacity: 0.5; transition: all 0.3s ease;">
+                <div id="match-category" style="font-size: 11px; font-weight: 800; color: #b2bec3; letter-spacing: 2px; margin-bottom: 5px;">⚡ MATCH EVENT ⚡</div>
+                <div id="match-title" style="font-size: 0.9rem; font-weight: bold; color: #fff; margin-bottom: 8px;">일정 대기 중</div>
+                <div id="match-time" style="font-size: 1.8rem; font-weight: 900; color: #b2bec3; text-shadow: none;">-</div>
+                <div id="match-desc" style="font-size: 10px; color: #b2bec3; margin-top: 6px;">시작 전</div>
+            </div>
+
+			
         </div>
 
     </div>
@@ -1082,6 +1090,163 @@ console.log("오늘 인덱스:", todayIdx, "전체 근무일:", count);
 
 </script>
 
+<script>
+
+// 👇 [최종 수정] 하프타임(전반~후반 사이) 및 중간광고, 보라색 승부차기 적용 통합 함수
+function updateMatchEvents() {
+    let now = new Date();
+    let year = now.getFullYear();
+    let month = now.getMonth() + 1;
+    let date = now.getDate();
+    let todayStr = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+
+    // 공통 평일(실근무일) 추출 헬퍼 함수
+    function getWorkingDays(startStr, endStr) {
+        let workingDays = [];
+        let curr = new Date(startStr);
+        let endDate = new Date(endStr);
+
+        while (curr <= endDate) {
+            let dow = curr.getDay();
+            let m = curr.getMonth() + 1;
+            let d = curr.getDate();
+            let dStrKey = `${curr.getFullYear()}-${m}-${d}`;
+            let dayInfo = (typeof db !== 'undefined' && db[dStrKey]) ? db[dStrKey] : {};
+            let isHol = (typeof holidays2026 !== 'undefined' && holidays2026.includes(`${m}-${d}`));
+
+	let isOff = dayInfo.isRed || dayInfo.type === 'vacation' || dayInfo.type === 'sick' || dayInfo.type === 'special';
+
+            if (dow !== 0 && dow !== 6 && !dayInfo.isRed && !isHol) {
+                workingDays.push(`${curr.getFullYear()}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+            }
+            curr.setDate(curr.getDate() + 1);
+        }
+        return workingDays;
+    }
+
+    let panelEl = document.getElementById('dynamic-match-panel');
+    let catEl = document.getElementById('match-category');
+    let titleEl = document.getElementById('match-title');
+    let timeEl = document.getElementById('match-time');
+    let descEl = document.getElementById('match-desc');
+
+    if (!panelEl) return;
+
+    // 기간 정의
+    let fEndDate = "2026-09-23";          // 전반전 종료일
+    let htStartDate = "2026-09-24";       // 하프타임 시작일 (전반~후반 사이 연휴)
+    let htEndDate = "2026-10-11";         // 하프타임 종료일
+    let sStartDate = "2026-10-12";        // 후반전 시작일
+    let sEndDate = "2026-10-23";          // 후반전 종료일
+    let penDateStr = "2026-11-02";        // 승부차기일
+
+    // 1. 전반전 기간 ( ~ 9/23)
+    if (todayStr <= fEndDate) {
+        catEl.innerText = "⚡ FIRST HALF ⚡";
+        titleEl.innerText = "전반전 (9/10 ~ 9/23)";
+        catEl.style.color = timeEl.style.color = "#00b894";
+        panelEl.style.border = "2px solid #00b894";
+        panelEl.style.boxShadow = "0 0 15px rgba(0, 184, 148, 0.3)";
+
+        let fDays = getWorkingDays("2026-09-10", "2026-09-23");
+        panelEl.style.opacity = "1";
+        timeEl.style.textShadow = "0 0 10px rgba(85,239,196,0.5)";
+        
+        let activeIdx = 0;
+        fDays.forEach((dStr, idx) => { if (todayStr >= dStr) activeIdx = idx; });
+        let minutes = fDays.length > 1 ? Math.round((activeIdx / (fDays.length - 1)) * 45) : 0;
+        timeEl.innerText = minutes + "분";
+        descEl.innerText = `전반전 진행 중 (${activeIdx + 1} / ${fDays.length})`;
+    }
+    // 2. 하프타임 기간 (9/24 ~ 10/11) : 전반과 후반 사이
+    else if (todayStr >= htStartDate && todayStr <= htEndDate) {
+        let htWorkingdays = ['2026.09.30', '2026.10.01'];
+
+let y = now.getFullYear();
+let m = String(now.getMonth() + 1).padStart(2, '0');
+let d = String(now.getDate()).padStart(2, '0');
+let todayStr = `${y}.${m}.${d}`;
+
+let workIdx = htWorkingdays.indexOf(todayStr);
+
+        if (workIdx !== -1) {
+            // 하프타임 중 실근무일인 경우 -> '하프타임 중간광고' (빨간색)
+            catEl.innerText = "📺 COMMERCIAL BREAK 📺";
+            titleEl.innerText = "하프타임 중간광고";
+            catEl.style.color = timeEl.style.color = "#ff7675";
+            panelEl.style.border = "2px solid #ff7675";
+            panelEl.style.boxShadow = "0 0 15px rgba(255, 118, 117, 0.3)";
+            panelEl.style.opacity = "1";
+            timeEl.innerText = "중간광고";
+            timeEl.style.textShadow = "0 0 10px rgba(250,177,160,0.5)";
+            descEl.innerText = `중간광고 (${workIdx + 1} / 2)`;
+        } else {
+            // 휴일/연휴인 일반 하프타임
+            catEl.innerText = "☕ HALF-TIME ☕";
+            titleEl.innerText = "하프타임 (9/24 ~ 10/11)";
+            catEl.style.color = timeEl.style.color = "#fdcb6e";
+            panelEl.style.border = "2px solid #fdcb6e";
+            panelEl.style.boxShadow = "0 0 15px rgba(253, 203, 110, 0.3)";
+            panelEl.style.opacity = "1";
+            timeEl.innerText = "하프타임";
+            timeEl.style.textShadow = "0 0 10px rgba(255,234,167,0.5)";
+            descEl.innerText = "하프타임 진행 중오후 3:38 2026-09-28";
+        }
+    }
+    // 3. 후반전 기간 (10/12 ~ 10/23)
+    else if (todayStr <= sEndDate) {
+        catEl.innerText = "⚡ SECOND HALF ⚡";
+        titleEl.innerText = "후반전 (10/12 ~ 10/23)";
+        catEl.style.color = timeEl.style.color = "#00b894";
+        panelEl.style.border = "2px solid #00b894";
+        panelEl.style.boxShadow = "0 0 15px rgba(0, 184, 148, 0.3)";
+
+        let sDays = getWorkingDays("2026-10-12", "2026-10-23");
+
+        if (todayStr < sStartDate) {
+            panelEl.style.opacity = "0.7";
+            timeEl.innerText = "0분";
+            timeEl.style.textShadow = "none";
+            let diffDays = Math.ceil((new Date(sStartDate) - new Date(todayStr)) / 86400000);
+            descEl.innerText = "D-" + diffDays + " 후 후반전 시작";
+        } else {
+            panelEl.style.opacity = "1";
+            timeEl.style.textShadow = "0 0 10px rgba(85,239,196,0.5)";
+            let activeIdx = 0;
+            sDays.forEach((dStr, idx) => { if (todayStr >= dStr) activeIdx = idx; });
+            let minutes = sDays.length > 1 ? Math.round((activeIdx / (sDays.length - 1)) * 45) : 0;
+            timeEl.innerText = minutes + "분";
+            descEl.innerText = `후반전 진행 중 (${activeIdx + 1} / ${sDays.length})`;
+        }
+    }
+    // 4. 승부차기 당일 및 이후 (11/2 ~)
+    else {
+        catEl.innerText = "🔥 PENALTY SHOOTOUT 🔥";
+        titleEl.innerText = "승부차기 (11/2)";
+        // 승부차기 색상 보라색으로 변경 (#a29bfe)
+        catEl.style.color = timeEl.style.color = "#a29bfe";
+        panelEl.style.border = "2px solid #a29bfe";
+        panelEl.style.boxShadow = "0 0 15px rgba(162, 155, 254, 0.3)";
+        panelEl.style.opacity = "1";
+        timeEl.innerText = "승부차기";
+        timeEl.style.textShadow = "0 0 10px rgba(162,155,254,0.5)";
+
+        if (todayStr < penDateStr) {
+            panelEl.style.opacity = "0.7";
+            let diffDays = Math.ceil((new Date(penDateStr) - new Date(todayStr)) / 86400000);
+            descEl.innerText = "D-" + diffDays + " 후 승부차기";
+        } else if (todayStr === penDateStr) {
+            panelEl.style.opacity = "1";
+            descEl.innerText = "운명의 승부차기 당일!";
+        } else {
+            panelEl.style.opacity = "0.5";
+            descEl.innerText = "승부차기 종료";
+        }
+    }
+}
+
+</script>
+	
 <div id="necklace-wrapper" style="margin: 40px auto; padding: 20px; background: #121212; border-radius: 20px; text-align: center; max-width: 1000px; user-select: none; position: relative; border: 1px solid #333;" tabindex="0">
     <!-- 상단 컨트롤 영역 (조절바, 슬롯, 최소화 버튼) -->
     <div style="position: absolute; top: 15px; right: 20px; display: flex; gap: 6px; align-items: center;">
