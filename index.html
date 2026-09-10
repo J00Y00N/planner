@@ -1025,6 +1025,8 @@ console.log("오늘 인덱스:", todayIdx, "전체 근무일:", count);
         });
 	localStorage.setItem('shared_working_map', JSON.stringify(workingDaysMap));
 	console.log("저장된 데이터 확인:", JSON.parse(localStorage.getItem('shared_working_map')));  
+
+	updateMatchEvents();
   }
 
 
@@ -1692,7 +1694,8 @@ document.getElementById('data-container').innerText = '데이터를 불러오지
 console.error('Error:', error);
 
 });
-
+	
+updateMatchEvents();
 </script>
 
 </body>
