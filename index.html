@@ -678,11 +678,11 @@
     "2026-8-17": {"isRed":true,"memo":"광복절 - 대체공휴일"},
 	"2026-8-27": {"memo":"안의초 개학식 - 10시 출근"},
 	"2026-9-7": {"type":"special"},
+	"2026-9-14": {"type":"special"},		
 	"2026-9-24": {"isRed":true,"memo":"추석"},
     "2026-9-25": {"isRed":true},
     "2026-9-28": {"type":"sick"},
     "2026-9-29": {"type":"sick"},
-    "2026-10-2": {"type":"special"},
     "2026-10-5": {"isRed":true},
     "2026-10-6": {"type":"sick"},
     "2026-10-7": {"type":"sick"},
@@ -1161,7 +1161,7 @@ function updateMatchEvents() {
     }
     // 2. 하프타임 기간 (9/24 ~ 10/11) : 전반과 후반 사이
     else if (todayStr >= htStartDate && todayStr <= htEndDate) {
-        let htWorkingdays = ['2026.09.30', '2026.10.01'];
+        let htWorkingdays = ['2026.09.30', '2026.10.01', '2026.10.02'];
 
 let y = now.getFullYear();
 let m = String(now.getMonth() + 1).padStart(2, '0');
@@ -1180,7 +1180,7 @@ let workIdx = htWorkingdays.indexOf(todayStr);
             panelEl.style.opacity = "1";
             timeEl.innerText = "중간광고";
             timeEl.style.textShadow = "0 0 10px rgba(250,177,160,0.5)";
-            descEl.innerText = `중간광고 (${workIdx + 1} / 2)`;
+            descEl.innerText = `중간광고 (${workIdx + 1} / 3)`;
         } else {
             // 휴일/연휴인 일반 하프타임
             catEl.innerText = "☕ HALF-TIME ☕";
