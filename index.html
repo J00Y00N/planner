@@ -530,7 +530,7 @@
 
         <div id="digital-clock" style="text-align:center; font-size:1.8rem; font-weight:900; margin-bottom:25px; color:var(--main)">00:00:00</div>
 
-        <div class="time-labels"><span>09</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span></div>
+        <div class="time-labels"><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span></div>
 
         <div class="timeline-track">
 
@@ -859,7 +859,7 @@
 
         document.getElementById('digital-clock').innerText = now.toLocaleTimeString('ko-KR', { hour12: false });
 
-        var start = 540, end = 1080; var curr = now.getHours() * 60 + now.getMinutes() + (now.getSeconds() / 60);
+        var start = 600, end = 1140; var curr = now.getHours() * 60 + now.getMinutes() + (now.getSeconds() / 60);
 
         var pct = Math.max(0, Math.min(100, ((curr - start) / (end - start)) * 100));
 
