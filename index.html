@@ -683,11 +683,11 @@
     "2026-9-25": {"isRed":true},
     "2026-9-28": {"type":"sick"},
     "2026-9-29": {"type":"sick"},
+	"2026-9-30": {"type":"sick"},
     "2026-10-5": {"isRed":true},
-    "2026-10-6": {"type":"sick"},
-    "2026-10-7": {"type":"sick"},
-    "2026-10-8": {"type":"sick"},
     "2026-10-9": {"isRed":true},
+	"2026-10-15": {"type":"sick"},
+	"2026-10-16": {"type":"sick"},
 	"2026-10-26": {"type":"sick"},
 	"2026-10-27": {"type":"sick"},
 	"2026-10-28": {"type":"sick"},		
@@ -708,7 +708,7 @@
 	"necklace_slots":[
 	{"start" : "2026-09-07T15:00:00.000Z",
 	"end" : "2026-09-23T15:00:00.000Z"},
-	{"start" : "2026-10-12T15:00:00.000Z",
+	{"start" : "2026-10-02T15:00:00.000Z",
 	"end" : "2026-10-23T15:00:00.000Z"},
 	{"start" : "2026-10-26T15:00:00.000Z",
 	"end" : "2026-11-16T15:00:00.000Z"}
@@ -1136,8 +1136,8 @@ function updateMatchEvents() {
     // 기간 정의
     let fEndDate = "2026-09-23";          // 전반전 종료일
     let htStartDate = "2026-09-24";       // 하프타임 시작일 (전반~후반 사이 연휴)
-    let htEndDate = "2026-10-11";         // 하프타임 종료일
-    let sStartDate = "2026-10-12";        // 후반전 시작일
+    let htEndDate = "2026-10-05";         // 하프타임 종료일
+    let sStartDate = "2026-10-06";        // 후반전 시작일
     let sEndDate = "2026-10-23";          // 후반전 종료일
     let penDateStr = "2026-11-02";        // 승부차기일
 
@@ -1194,15 +1194,18 @@ let workIdx = htWorkingdays.indexOf(todayStr);
             descEl.innerText = "하프타임 진행 중";
         }
     }
-    // 3. 후반전 기간 (10/12 ~ 10/23)
-    else if (todayStr <= sEndDate) {
+// 3. 후반전 기간 (10/6 ~ 10/22)
+    else if (todayStr <= "2026-10-22") {
         catEl.innerText = "⚡ SECOND HALF ⚡";
-        titleEl.innerText = "후반전 (10/12 ~ 10/23)";
+        titleEl.innerText = "후반전 (10/6 ~ 10/22)";
         catEl.style.color = timeEl.style.color = "#00b894";
         panelEl.style.border = "2px solid #00b894";
         panelEl.style.boxShadow = "0 0 15px rgba(0, 184, 148, 0.3)";
 
-        let sDays = getWorkingDays("2026-10-12", "2026-10-23");
+        let sDays = [
+            ...getWorkingDays("2026-10-06", "2026-10-14"), 
+            ...getWorkingDays("2026-10-19", "2026-10-22")
+        ];
 
         if (todayStr < sStartDate) {
             panelEl.style.opacity = "0.7";
@@ -1220,11 +1223,22 @@ let workIdx = htWorkingdays.indexOf(todayStr);
             descEl.innerText = `후반전 진행 중 (${activeIdx + 1} / ${sDays.length})`;
         }
     }
-    // 4. 승부차기 당일 및 이후 (11/2 ~)
+    // 4. 연장전 기간 (10/23)
+    else if (todayStr === "2026-10-23") {
+        catEl.innerText = "⚡ EXTRA TIME ⚡";
+        titleEl.innerText = "연장전 (10/23)";
+        catEl.style.color = timeEl.style.color = "#fdcb6e";
+        panelEl.style.border = "2px solid #fdcb6e";
+        panelEl.style.boxShadow = "0 0 15px rgba(253, 203, 110, 0.3)";
+        panelEl.style.opacity = "1";
+        timeEl.innerText = "٩(^ᴗ^)۶";
+        timeEl.style.textShadow = "0 0 10px rgba(255,234,167,0.5)";
+        descEl.innerText = "진짜 끝";
+    }
+    // 5. 승부차기 당일 및 이후 (11/2 ~)
     else {
         catEl.innerText = "🔥 PENALTY SHOOTOUT 🔥";
         titleEl.innerText = "승부차기 (11/2)";
-        // 승부차기 색상 보라색으로 변경 (#a29bfe)
         catEl.style.color = timeEl.style.color = "#a29bfe";
         panelEl.style.border = "2px solid #a29bfe";
         panelEl.style.boxShadow = "0 0 15px rgba(162, 155, 254, 0.3)";
