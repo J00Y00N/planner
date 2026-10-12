@@ -1194,10 +1194,11 @@ let workIdx = htWorkingdays.indexOf(todayStr);
             descEl.innerText = "하프타임 진행 중";
         }
     }
+		
 // 3. 후반전 기간 (10/6 ~ 10/22)
     else if (todayStr <= "2026-10-22") {
         catEl.innerText = "⚡ SECOND HALF ⚡";
-        titleEl.innerText = "후반전 (10/6 ~ 10/22)";
+        titleEl.innerText = "후반전 (10/6 ~ 10/23)";
         catEl.style.color = timeEl.style.color = "#00b894";
         panelEl.style.border = "2px solid #00b894";
         panelEl.style.boxShadow = "0 0 15px rgba(0, 184, 148, 0.3)";
@@ -1220,7 +1221,7 @@ let workIdx = htWorkingdays.indexOf(todayStr);
             sDays.forEach((dStr, idx) => { if (todayStr >= dStr) activeIdx = idx; });
             let minutes = sDays.length > 1 ? Math.round((activeIdx / (sDays.length - 1)) * 45) : 0;
             timeEl.innerText = minutes + "분";
-            descEl.innerText = `후반전 진행 중 (${activeIdx + 1} / ${sDays.length})`;
+            descEl.innerText = `후반전 진행 중 (${activeIdx + 1} / ${sDays.length + 1})`;
         }
     }
     // 4. 연장전 기간 (10/23)
@@ -1233,7 +1234,7 @@ let workIdx = htWorkingdays.indexOf(todayStr);
         panelEl.style.opacity = "1";
         timeEl.innerText = "٩(^ᴗ^)۶";
         timeEl.style.textShadow = "0 0 10px rgba(255,234,167,0.5)";
-        descEl.innerText = "진짜 끝";
+        descEl.innerText = "마지막 날 ! (11 / 11)";
     }
     // 5. 승부차기 당일 및 이후 (11/2 ~)
     else {
@@ -1249,13 +1250,13 @@ let workIdx = htWorkingdays.indexOf(todayStr);
         if (todayStr < penDateStr) {
             panelEl.style.opacity = "0.7";
             let diffDays = Math.ceil((new Date(penDateStr) - new Date(todayStr)) / 86400000);
-            descEl.innerText = "D-" + diffDays + " 후 승부차기";
+            descEl.innerText = "진짜 엔딩까지 D-" + diffDays ;
         } else if (todayStr === penDateStr) {
             panelEl.style.opacity = "1";
-            descEl.innerText = "운명의 승부차기 당일!";
+            descEl.innerText = "지겨운 얼굴들 보는 날 ~";
         } else {
             panelEl.style.opacity = "0.5";
-            descEl.innerText = "승부차기 종료";
+            descEl.innerText = "고생했어 ! 다시는 안 와도 돼 !";
         }
     }
 }
